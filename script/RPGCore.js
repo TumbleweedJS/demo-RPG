@@ -24,6 +24,13 @@ function RPGCore() {
  this.directionPressed = [false, false, false, false, false];
  this.player = new Player(3 * 32, 2 * 32, 32, 32);
  this.window = new TW.Graphic.Window(document.getElementById("myCanvas"));
+
+	this.window.camera = new TW.Graphic.TrackingCamera(this.player.animatedSprite);
+	this.window.camera.margin = {
+		x: 100,
+		y: 100
+	};
+
  this.listCollisionBox = [];
  this.keyboard = new TW.Event.KeyboardInput();
  this.keyboard.addListener("KEY_W", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerUp.bind(this));
