@@ -6,7 +6,6 @@ DOWN:3,
 RIGHT:4
 };
 
-
 var RPGCore = (function(){
 
 function RPGCore() {
@@ -19,9 +18,9 @@ function RPGCore() {
  
  this.audioManager = new TW.Audio.Manager;
  if (this.testAudio.canPlayType("audio/ogg") != "") {
- this.idSound1 = this.audioManager.add("ressources/Music/Painted_Dreams_Mock_Up.ogg", 1);
+ this.idSound1 = this.audioManager.add("ressources/Music/main.ogg", 1);
  } else {
- this.idSound1 = this.audioManager.add("ressources/Music/Painted_Dreams_Mock_Up.mp3", 1);
+ this.idSound1 = this.audioManager.add("ressources/Music/main.mp3", 1);
  }
  
  delete this.testAudio;
@@ -209,7 +208,7 @@ RPGCore.prototype.loadMap = function(mapName) {
 	{
 		var request = new XMLHttpRequest();
 		request.open("GET", this.file_name, false);
-		request.overrideMimeType('text/xml');
+		//request.overrideMimeType('text/xml');
 		request.send();
 		var xml = request.responseXML;
 		if (xml != null)
@@ -223,6 +222,7 @@ RPGCore.prototype.loadMap = function(mapName) {
 		tumbleweedLayer.addChild(this.player.animatedSprite);
 		this.listCollisionBox = this.parser.getCollisionList();
 	}
+	this.tumbleweedLayer = tumbleweedLayer;
 	this.loadingScreen = new LoadingScreen(this);
 	this.gameloop.addObject(this.loadingScreen);
 	this.loaderInterval = window.setInterval(this.checkImageLoaded.bind(this), 30);
@@ -262,7 +262,7 @@ RPGCore.prototype.draw = function() {
 	 context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 	 context.restore();
 	 context.save();
-	 context.font = 'italic 60px Calibri';
+	 context.font = 'italic 50px Calibri';
 	 context.shadowColor = "rgb(10, 10, 10)";
 	 context.shadowOffsetX = 10;
 	 context.shadowOffsetY = 10;
@@ -283,6 +283,19 @@ RPGCore.prototype.isPlayerCollidingAnObstacle = function() {
   if (this.listCollisionBox[i].isCollidingBox(this.player.collisionBox)) {
     return true;
   }
+ }
+ 
+ if (this.player.collisionBox.x + this.player.collisionBox.w > this.tumbleweedLayer.width) {
+	return true;
+ }
+ if (this.player.collisionBox.x < 0) {
+	return true;
+ }
+ if (this.player.collisionBox.y < 0) {
+	return true;
+ }
+ if (this.player.collisionBox.y + this.player.collisionBox.h > this.tumbleweedLayer.height) {
+	return true;
  }
  return false;
 };

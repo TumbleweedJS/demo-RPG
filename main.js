@@ -35,7 +35,7 @@ var LoadingScreen = (function() {
 	context.fillRect(0,0,context.canvas.width, context.canvas.height);
 	context.fillStyle = "rgb(0, 0, 0)";
 	context.strokeRect(0,0,context.canvas.width, context.canvas.height);
-	context.font = 'italic 30px Calibri';
+	context.font = 'italic 20px Calibri';
 	
 	var gradientFont = context.createLinearGradient(0, 0, context.canvas.width, context.canvas.height);
 	gradientFont.addColorStop(0, "rgb(50, 0, 50)");
@@ -73,7 +73,7 @@ window.onload = function start() {
 	this.rpgCore.setDebug(false);
 	this.rpgCore.onImagesLoaded = launchGame.bind(this);
 	this.rpgCore.gameloop = gameloop;
-	this.rpgCore.loadMap("map.tmx");
+	this.rpgCore.loadMap("map.xml");
 	this.gameloop.start();
 };
 

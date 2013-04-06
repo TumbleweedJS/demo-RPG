@@ -16,7 +16,7 @@ modification, are permitted provided that the following conditions are met:
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+DISCLAIMED. IN NO EVENT SHALL TUMBLEWEED STUDIO BE LIABLE FOR ANY
 DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -2249,6 +2249,8 @@ var TW = TW || {};
 			counter: 0
 		};
 	    this.object_to_suppress = [];
+
+
         /**
          The value that limits the maximum number of frames per second.
          Used only if requestAnimationFrame is not found
@@ -2280,6 +2282,7 @@ var TW = TW || {};
          * If a function does not exist, the gameloop will ignore it. update and draw functions are not mandatory.
          *
          * @property {Array} object
+         * @deprecated use `addObject` or `rmObject` instead.
          */
         this.object = [];
     }
@@ -2393,6 +2396,16 @@ var TW = TW || {};
         }
     };
 
+	/**
+	 * indicate if the loop is active or not.
+	 *
+	 * @method isRunning
+	 * @return {Boolean} `true` if loop is running; `false` if the loop is stopped or paused.
+	 */
+	Gameloop.prototype.isRunning = function() {
+		return (this._update_handler !== null);
+	};
+
 
     /**
      update the logic one step.
@@ -2492,12 +2505,26 @@ var TW = TW || {};
 	 * - onSleep        this method is called when the GameState looses the focus.
 	 * - onWakeUp       this method is called when the GameState takes back the focus.
 	 *
-	 * The main aim of these methods is to be overrided by your own methods.
-	 * For example, if you want to override the onUpdate and onDraw method, you should do as follow :
+	 * There are two ways to define these methods:
 	 *
-	 *   var myGameState = new TW.Gameloop.GameState();
-	 *   myGameState.onUpdate = myOnUpdateFunc;
-	 *   myGameState.onDraw = myOnDrawFunc;
+	 * - If you have a lot of code for the state, you can inherit from `GameState` and override these methods.
+	 *   Or more simply directly redefine a method of an instance :
+	 *
+	 *         var myGameState = new TW.Gameloop.GameState();
+	 *         myGameState.onUpdate = myOnUpdateFunc;
+	 *         myGameState.onDraw = myOnDrawFunc;
+	 *
+	 * - For a little state, with just few code, methods can be passed in arguments:
+	 *
+	 *         new TW.Gameloop.GameState({
+	 *              onUpdate: function(elapsedTime) {
+	 *                  //before update
+	 *              },
+	 *              onDraw() {
+	 *                  //before draw
+	 *              }
+	 *         });
+	 *
 	 *
 	 * You can also insert Layers into the GameState. You can sort them by their z-index in asc or desc order.
 	 * Layers allows you to render something on the context of the GameStateStack.
@@ -2514,6 +2541,7 @@ var TW = TW || {};
 	 * - go to a special state in the stack
 	 *
 	 * Here is an example on which i show how you can push state, pop state and go to a special state :
+	 *
 	 *     this.getGameStateStack().push(newState);
 	 *     this.getGameStateStack().pop();
 	 *     this.getGameStateStack().goToState("state_name");
@@ -2521,11 +2549,18 @@ var TW = TW || {};
      * @class GameState
 	 * @param {Object} params this object should contain severals members
 	 *   @param {String} [params.name] which is the name of the State.
-	 *   @param {Boolean} [params.sortLayerAsc] which is a boolean.
+	 *   @param {Boolean} [params.sortLayerAsc=true] which is a boolean.
      *   It must be equal to true if you want to sort Layers by ascendant order.
 	 *   Otherwise it must be equal to false. Default value equals true.
-	 *   @param {Boolean} [params.sortCallbackAsc] which is a boolean. It must be equal to true if you
+	 *   @param {Boolean} [params.sortCallbackAsc=true] which is a boolean. It must be equal to true if you
 	 *   want to sort Callbacks by ascendant order. Otherwise it must be equal to false. default value equals true.
+	 *   @param {Function} [params.onUpdate] called when the GameState is updating.
+	 *   @param {Function} [params.onDraw] called when the GameState is drawing.
+	 *   @param {Function} [params.onCreation] called when the GameState is added to a GameStateStack.
+	 *   @param {Function} [params.onDelete] called when the GameState is removed from a GameStateStack.
+	 *   @param {Function} [params.onSleep] called when the GameState looses the focus.
+	 *   @param {Function} [params.onWakeUp] called when the GameState takes back the focus.
+	 *
 	 * @constructor
 	 */
 	function GameState(params) {
@@ -2533,10 +2568,62 @@ var TW = TW || {};
 		this.layerList = [];
 		this.callbackList = [];
 
+		//noinspection JSHint,JSHint
 		TW.Utils.copyParam(this, params, {
 			name:               "",
 			sortLayerAsc:       true,
-			sortCallbackAsc:    true
+			sortCallbackAsc:    true,
+
+			/**
+			 * method called before each update. Can be overridden or given as argument to the constructor.
+			 *
+			 * @method onUpdate0
+			 * @param {Number} elapsedTime represents the amount of milliseconds elapsed since the last update call.
+			 */
+			/* jshint:unused:false */
+			onUpdate:           function(elapsedTime) {},
+
+			/**
+			 * method called before each draw. Can be overridden or given as argument to the constructor.
+			 *
+			 * @method onDraw
+			 */
+			onDraw:             function() {},
+
+			/**
+			 * method called when the state is created and placed on the stack.
+			 * Can be overridden or given as argument to the constructor.
+			 *
+			 * @method onCreation
+			 */
+			onCreation:         function() {},
+
+			/**
+			 * method called when the state is removed from the stack.
+			 * Can be overridden or given as argument to the constructor.
+			 *
+			 * **Note:** The state object is not always really deleted, and can be reused later.
+			 * This method should put the GameState as if it has never been used.
+			 *
+			 * @method onDelete
+			 */
+			onDelete:           function() {},
+
+			/**
+			 * method called when the state becomes active.
+			 * Can be overridden or given as argument to the constructor.
+			 *
+			 * @method onWakeUp
+			 */
+			onWakeUp:           function() {},
+
+			/**
+			 * method called when the state is put to sleep (another state becomes active).
+			 * Can be overridden or given as argument to the constructor.
+			 *
+			 * @method onSleep
+			 */
+			onSleep:            function() {}
 		});
 	}
 
@@ -2700,7 +2787,7 @@ var TW = TW || {};
 	/**
 	 * This method is private, you do not have to use it, it is used internally by the GameStateStack class.
 	 * @method draw
-	 * @param {GraphicalContext} canvas_context graphicalContext on which graphical contents will be drawn.
+	 * @param {CanvasRenderingContext2D} canvas_context graphicalContext on which graphical contents will be drawn.
 	 */
 	GameState.prototype.draw = function(canvas_context) {
 		this.onDraw();
@@ -2709,62 +2796,8 @@ var TW = TW || {};
 		}
 	};
 
-	/**
-	 * The main aim of this method is to be overrided by one of your functions. It allows you to make your own onUpdate
-	 * methods for the GameStates.
-	 * @method onUpdate
-	 * @param {Number} elapsedTime represents the amount of milliseconds elapsed since the last update call.
-	 */
-	GameState.prototype.onUpdate = function(elapsedTime) {
-
-	};
-
-	/**
-	 * The main aim of this method is to be overrided by one of your functions. It allows you to execute code
-	 * just before layers are drawn on the graphicalContext.
-	 * @method onDraw
-	 */
-	GameState.prototype.onDraw = function() {
-
-	};
-
-	/**
-	 * the main aim of this method is to be overrided by one of your functions. It allows you to make your own
-	 * onCreation method for the GameState.
-	 * @method onCreation
-	 */
-	GameState.prototype.onCreation = function() {
-
-	};
-
-	/**
-	 * The main aim of this method is to be overrided by one of your functions. It allows you to make your own onDelete
-	 * method for the GameState
-	 * @method onDelete
-	 */
-	GameState.prototype.onDelete = function() {
-
-	};
-
-	/**
-	 * The main aim of this method is to be overrided by one of your functions. It allows you to make your own onWakeUp
-	 * method for the GameState.
-	 * @method onWakeUp
-	 */
-	GameState.prototype.onWakeUp = function() {
-
-	};
-
-	/**
-	 * The main aim of this method is to be overrided by one of your functions. It allows you to make your own onSleep
-	 * method for the GameState.
-	 * @method onSleep
-	 */
-	GameState.prototype.onSleep = function() {
-
-	};
-
 }(TW));
+
 /**
  @module Math
  @namespace Math
@@ -3063,6 +3096,38 @@ var TW = TW || {};
         return true;
     };
 
+
+	Matrix2D.prototype.inverse = function() {
+		var result = new Matrix2D();
+		var m = this.data;
+
+		result.data[0][0] = m[2][2] * m[1][1] - m[1][2] * m[2][1];
+		result.data[0][1] = m[0][2] * m[2][1] - m[2][2] * m[0][1];
+		result.data[0][2] = m[1][2] * m[0][1] - m[0][2] * m[1][1];
+		result.data[1][0] = m[1][2] * m[2][0] - m[2][2] * m[1][0];
+		result.data[1][1] = m[2][2] * m[0][0] - m[0][2] * m[2][0];
+		result.data[1][2] = m[0][2] * m[1][0] - m[1][2] * m[0][0];
+		result.data[2][0] = m[2][1] * m[1][0] - m[1][1] * m[2][0];
+		result.data[2][1] = m[0][1] * m[2][0] - m[2][1] * m[0][0];
+		result.data[2][2] = m[1][1] * m[0][0] - m[0][1] * m[1][0];
+
+		var det = (m[0][0] * (m[2][2] * m[1][1] - m[1][2] * m[2][1])) -
+		          (m[0][1] * (m[2][2] * m[1][0] - m[1][2] * m[2][0])) -
+		          (m[0][2] * (m[2][1] * m[1][0] - m[1][1] * m[2][0]));
+
+		if (det === 0) {
+			return null;
+		}
+
+		for (var i = 0; i < 3; i++) {
+			for (var j = 0; j < 3; j++) {
+				result.data[i][j] *= 1 / det;
+
+			}
+		}
+		return result;
+	};
+
     /**
      give a data representation of Matrix
 
@@ -3076,7 +3141,7 @@ var TW = TW || {};
         while (i < this.height) {
             j = 0;
             while (j < this.width) {
-                chain_to_display += this.data[i][j] + " ";
+                chain_to_display += this.data[j][i] + " ";
                 j++;
             }
             chain_to_display += "\n";
@@ -3500,12 +3565,12 @@ var TW = TW || {};
     TW.Graphic.SpatialContainer = SpatialContainer;
 
     if (typeof window.define === "function" && window.define.amd) {
-        define('graphic/SpatialContainer',[], function() {
+        define('graphic/SpatialContainer',['../math/Vector2D'], function() {
             return SpatialContainer;
         });
     }
 
-    /**
+	/**
      * A spatial container is a data structure used for storage of spatial 2D objects
      * (generally {{#crossLink "Graphic.GraphicObject" }}{{/crossLink}}).
      * It propose many method for manipulate these objects using theirs coordinates.
@@ -3579,7 +3644,6 @@ var TW = TW || {};
 
     /**
      * This method allow you to apply a callback to the GraphicObject who are at the specified position.
-     * __TODO: not available__
      *
      * @method applyToPoint
      * @param {Number} x the x position where the GraphicObject must be to get the callback applied on them
@@ -3587,60 +3651,49 @@ var TW = TW || {};
      * @param {Function} callback to apply to every GraphicObject which position match the x, y parameters.
      */
     SpatialContainer.prototype.applyToPoint = function(x, y, callback) {
-        for (var i = 0; i < this.containerList.length; i++) {
-            if (this.containerList[i].x === x && this.containerList[i].y === y) {
-                callback(this.containerList[i]);
-            }
-        }
-    };
+	    var Vector2D = TW.Math.Vector2D;
+	    var length = this.containerList.length;
 
-    /**
-     * It returns the det of two vectors, it is used internally by the applyToZone method.
-     *
-     * @method computeDet
-     * @param {Object} d represent a vector
-     * @param {Object} t represent a vector
-     * @return {Number} return the det of the vectors d and t.
-     * @private
-     */
-    SpatialContainer.prototype._computeDet = function(d, t) {
-        return ((d.x * t.y) - (d.y * t.x));
+        for (var i = 0; i < length; i++) {
+	        var target = this.containerList[i];
+
+	        var point = target.matrix.inverse().multiplyVector(new Vector2D(x - target.x, y - target.y));
+	        point.add(new Vector2D(target.xCenterPoint, target.yCenterPoint));
+
+	        if (point.x >= 0 && point.x <= target.width &&
+		        point.y >= 0 && point.y <= target.height) {
+		        callback(this.containerList[i]);
+	        }
+        }
     };
 
     /**
      * This method allow you to apply a callback only on the object that are inside of the polygon
      * specified by the points.
      *
+     * The goal is to process optimization to apply callback only if necessary, for improve speed. Objects that are not
+     * in the zone can be used: somes optimizations can be aproximate.
+     *
+     *
+     * The default method use directly `applyAll` and no optimization is done. (selecting good and bas objects
+     * whithout tree structure take more time than display them)
+     *
      * @method applyToZone
+     *
      * @param {Array} pointsArray array of points like `{{10,0},{0,10},{2,3}}
      *  *Note that the polygon MUST BE composed at least of 3 points,
      *  otherwise the method will not do anything and then it'll return false.*
+     *
      * @param {Function} callback function to be called on every GraphicObject that are inside of
      *  the polygon specified by pointsArray.
      * @return {Boolean} return true if the pointArray was a valid array of points, otherwise it will return false.
      */
     SpatialContainer.prototype.applyToZone = function(pointsArray, callback) {
-
         if (!(pointsArray && pointsArray.length >= 3)) {
             return false;
         }
-        for (var j = 1; j < this.containerList.length; j++) {
-            var outside = false;
-            for (var i = 1; i < pointsArray.length; i++) {
-                var vector_polygon_edge = {x: (pointsArray[i].x - pointsArray[i - 1].x), y: (pointsArray[i].x -
-                    pointsArray[i - 1].x)};
-                var vector_to_point = {x: (this.containerList[j].x -
-                    pointsArray[i - 1].x), y: (this.containerList[j].y -
-                    pointsArray[i - 1].y)};
-                var det = this._computeDet(vector_polygon_edge, vector_to_point);
-                if (det > 0) {
-                }
-                outside = true;
-            }
-            if (outside === false) {
-                callback(this.containerList[j]);
-            }
-        }
+
+	    this.applyAll(callback);
     };
 
 }(TW));
@@ -3894,7 +3947,11 @@ var TW = TW || {};
             this._localCanvas.save();
             this._camera.prepare(this._localCanvas);
             //this._localCanvas.translate(-this.xCenterPoint, -this.yCenterPoint);
-            this._spatialContainer.applyAll(function(child) {
+            this._spatialContainer.applyToZone([
+	            {x: 0, y: 0},
+	            {x: 0, y: this.height},
+	            {x: this.width, y: this.height},
+	            {x: this.width, y: 0} ], function(child) {
                 child.draw(this._localCanvas);
             }.bind(this));
             this._localCanvas.restore();
@@ -4198,7 +4255,7 @@ var TW = TW || {};
 	 *
      * @class GameStateStack
 	 * @constructor
-	 * @param {Canvas} canvas the canvas on which the States will be drawn.
+	 * @param {HTMLCanvasElement} canvas the canvas on which the States will be drawn.
 	 */
 	function GameStateStack(canvas) {
 		this.viewStack = [];
@@ -4248,17 +4305,15 @@ var TW = TW || {};
 	 * Otherwise it will return false.
 	 */
 	GameStateStack.prototype.goToState = function(name) {
-		var i = this.viewStack.length > 0 ? this.viewStack.length - 1 : 0;
-		for (; i >= 0; i--) {
+		var length = this.viewStack.length;
+		for (var i = length - 1; i >= 0; i--) {
 			if (this.viewStack[i].getName() === name) {
-				var number_of_pop_needed = this.viewStack.length - i;
-				if (number_of_pop_needed > 0) {
-					number_of_pop_needed--;
+				this.viewStack[length - 1].onSleep();
+				for (var j = i + 1; j < length; j++) {
+					this.viewStack[j].onDelete();
 				}
-				while (number_of_pop_needed > 0) {
-					this.pop();
-					number_of_pop_needed--;
-				}
+				this.viewStack.splice(i + 1, length - i);
+				this.viewStack[i].onWakeUp();
 				return true;
 			}
 		}
@@ -4367,7 +4422,16 @@ var TW = TW || {};
      *
      * @method setFillColor
      * @param {String} color this parameter represent the color to assign to the fill mode.
-     *  For example if you want to set it black, you should do `myShape.setFillColor("black");`
+     * @example
+     *
+     *      myShape.setFillColor("black");
+     *      myShape.setFillCOlor("#FF0000");           // hexadecimal notation
+     *      myShape.setFillCOlor("rgb(0, 255, 0)");    // decimal RGB notation
+     *
+     * It's possible to get more complex effets using CanvasGradient or CanvasPattern objects. For more details, see
+     * [the canvas 2D context specs](http://www.w3.org/html/wg/drafts/2dcontext/html5_canvas/#dom-context-2d-fillstyle).
+     *
+     *
      */
     Shape.prototype.setFillColor = function(color) {
         this.color = color;
@@ -4378,7 +4442,7 @@ var TW = TW || {};
      * Two modes are available "WIRED" and "FILLED".
      *
      * @method setMode
-     * @param {String} type this parameter represent the draw style. type can be set to "WIRED" or "FILLED".
+     * @param {"WIRED"|"FILLED"} type this parameter represent the draw style.
      */
     Shape.prototype.setMode = function(type) {
         if (type === "WIRED" || type === "FILLED") {
@@ -4394,7 +4458,15 @@ var TW = TW || {};
      *
      * @method setStrokeColor
      * @param {String} color this parameter represent the color to apply to the stroke mode.
-     *  For example to set the stroke color to black you should used `myShape.setStrokeColor("black");`
+     * @example
+     *
+     *      myShape.setStrokeColor("black");
+     *      myShape.setStrokeColor("#FF0000");           // hexadecimal notation
+     *      myShape.setStrokeColor("rgb(0, 255, 0)");    // decimal RGB notation
+     *
+     * It's possible to get more complex effets using CanvasGradient or CanvasPattern objects. For more details, see the
+     * [canvas 2D context specs](http://www.w3.org/html/wg/drafts/2dcontext/html5_canvas/#dom-context-2d-strokestyle).
+
      */
     Shape.prototype.setStrokeColor = function(color) {
         this.strokeColor = color;
@@ -4424,20 +4496,25 @@ var TW = TW || {};
     }
 
     /**
-     * This class extends the Shape class. When you create a Circle object
-     * like `var myCircle = new TW.Graphic.Circle();`
+     * This class extends the Shape class.
+     *
+     * When you create a Circle object like `var myCircle = new TW.Graphic.Circle();`
      * the default radius of the object is 50pixels.
+     *
+     * **Note:** the `[x, y]` coordinates corresponds to the top left corner of the square which includes the circle.
+     * If you want to draw to circle from its origin, you should consider moving its centerPoint:
+     *
+     *     circle.setCenterPoint(radius, radius);
      *
      * @class Circle
      * @extends Shape
      * @constructor
      * @param {Object} [params] set of properties given to Circle.
-     *   *params* is given to {{#crossLink "Graphic.Shape"}}{{/crossLink}} constructor.
+     *   `params` is given to {{#crossLink "Graphic.Shape"}}{{/crossLink}} constructor.
      *   @param {Number} [params.radius=50] radius of the circle.
      */
     function Circle(params) {
         TW.Graphic.Shape.call(this, params);
-	    TW.Graphic.GraphicObject.call(this, params);
 	    TW.Utils.copyParam(this, params, {
 		    radius:          50
 	    });
@@ -4460,7 +4537,7 @@ var TW = TW || {};
             this.matrix.transformContext(context);
             context.translate(-this.xCenterPoint, -this.yCenterPoint);
             context.beginPath();
-            context.arc(0, 0, this.radius, Math.PI * 2, 0, true);
+            context.arc(this.radius, this.radius, this.radius, Math.PI * 2, 0, true);
             if (this.mode === "WIRED") {
                 context.strokeStyle = this.strokeColor;
                 context.stroke();
@@ -4499,16 +4576,25 @@ var TW = TW || {};
     }
 
 	/**
+	 * a Rect defined by it's `x`, `y`, `width` and `height` properties.
+	 *
 	 * @class Rect
 	 * @extends Shape
-	 * @param {Object} [params]
-	 *   *params* is given to {{#crossLink "Graphic.Shape"}}{{/crossLink}} constructor.
 	 * @constructor
+	 * @param {Object} [params]
+	 *  `params` is given to {{#crossLink "Graphic.Shape"}}{{/crossLink}} constructor.
 	 */
     function Rect(params) {
         TW.Graphic.Shape.call(this, params);
     }
 
+	/**
+	 * This overridden draw method allow the Rect class to draw a rectangle on the context given in parameter.
+	 *
+	 * @method draw
+	 * @param context if the context object is not a valid object the method will returns false, otherwise it
+	 * will returns true.
+	 */
     Rect.prototype.draw = function(context) {
         if (context) {
             //TODO apply the matrix transformations on the context before drawing the circle
@@ -4638,7 +4724,7 @@ var TW = TW || {};
 }(TW));
 /**
  @module Graphic
- @namespace SpriteSheet
+ @namespace Graphic
  */
 
 var TW = TW || {};
@@ -4663,7 +4749,7 @@ var TW = TW || {};
      * @param {Object} config represents the object which provides the description of each animation.
      *
      *
-     *      var mySpriteSheet = new SpriteSheet(image, config);
+     *     var mySpriteSheet = new SpriteSheet(image, config);
      *
      *  config object represents the raw configuration of the spriteSheet.
      *  Please see below the synthax of a spriteSheet :
@@ -4675,74 +4761,82 @@ var TW = TW || {};
      *
      *  First of all let's define the structure of our SpriteSheet object :
      *
-     *      {}
+     *     {}
      *
      *  As you can see it is only an empty JSON object.
      *  This object can handle some informations about the animation.
      *
-     *  **Setting default values.**
+     * ### Setting default values
      *
-     *      default : {}
+     *     default : {}
      *
      *  The default object can handle default values. It is useful to make some constants in the spriteSheet.
      *  For example if you want to define 5 constants (x = 10, y = 30, w = 50, h = 60, framerate = 25) You must
      *  proceed like this :
      *
-     *      default : {x : 10,
-     *             y : 30,
-     *             w : 50,
-     *             h : 60,
-     *             framerate : 25}
+     *     default : {
+     *          x : 10,
+     *          y : 30,
+     *          w : 50,
+     *          h : 60,
+     *          framerate : 25
+     *     }
      *
      *
-     *  **Setting animations.**
+     * ### Setting animations
+     *
      *  Each animation is composed by frames and can also define a framerate value which override the framerate
      *  from default values.
      *  Here is an important tip, in some animations you may don't want to use the default values. Then you just
      *  Have to redefine them inside of the animation.
      *  To create an animation named 'walk' which have framerate set to 12 you must proceed like this :
      *
-     *      walk : {
+     *     walk : {
      *          framerate: 12,
      *          frames : []
-     *          }
+     *     }
      *
      *  Note that there is an entry in you walk animation called frames. This entry must contain each frame of the
      *  walk animation.
      *
-     *  **Setting frames.**
+     * ### Setting frames
+     *
      *  Each animation contain some frames. It works like a flipbook, each frame are displayed one
      *  after another, tumbleweed will wait 1/framerate seconds to display the next frame.
      *  Let's imagine that your walk animation is made of three frames inside of your SpriteSheet.
-     *  The first one will have the coordinate : x = 0, y = 0, w = 50, h = 50
-     *  The second one will have the coordinate : x = 50, y = 0, w = 50, h = 50
-     *  And finally the third one will have the coordinate : x = 0, y = 50, w = 50, h = 50
+     *  The first one will have the coordinate : `x = 0, y = 0, w = 50, h = 50`
+     *  The second one will have the coordinate : `x = 50, y = 0, w = 50, h = 50`
+     *  And finally the third one will have the coordinate : `x = 0, y = 50, w = 50, h = 50`
      *
      *  Let's see below what will be the result of these frame inside of our walk animation object :
      *
-     *      walk : {
+     *     walk : {
      *          framerate: 12,
-     *          frames : [{x:0, y:0, w: 50, h: 50},
-     *                    {x:50, y:0, w:50, h:50},
-     *                   {x:0, y:50, w:50, h:50}]
-     *          }
+     *          frames : [
+     *              { x: 0, y: 0, w: 50, h: 50 },
+     *              { x: 50, y: 0, w: 50, h: 50 },
+     *              { x: 0, y: 50, w: 50, h: 50 }
+     *          ]
+     *     }
      *
      * Let's wrap it inside of our config object :
      *
      *     var config = {
-     *     default: {
-     *      x: 0,
-     *      y: 0,
-     *      w: 50,
-     *      h: 50,
-     *      framerate: 25
-     *     },
-     *     walk: {
-     *          framerate: 12,
-     *          frames: [{x:0, y:0, w: 50, h: 50},
-     *                    {x:50, y:0, w:50, h:50},
-     *                   {x:0, y:50, w:50, h:50}]
-     *     }
+     *          default: {
+     *              x: 0,
+     *              y: 0,
+     *              w: 50,
+     *              h: 50,
+     *              framerate: 25
+     *          },
+     *          walk: {
+     *              framerate: 12,
+     *              frames: [
+     *                  {x:0, y:0, w: 50, h: 50},
+     *                  {x:50, y:0, w:50, h:50},
+     *                  {x:0, y:50, w:50, h:50}
+     *              ]
+     *          }
      *     };
      *
      * Now you have a walk animation which contain 3 frames which will be displayed with a framerate of 12.
@@ -4750,101 +4844,130 @@ var TW = TW || {};
      * In the following parts i will describe how to make animation's reference and how you can do
      * transformations on them.
      *
-     * **Animation's reference**
-     * Sometimes you can need to specify another animation which is a copy of another animation but with some
-     * transformations on it, the typical case will be an animation of walking to right and another animation which
-     * is walking to left.
-     * Frames are the same except that they must be reverted horizontally.
-     * To make it we will introduce a new entity which is the flip flags.
-     * Flip flags allow you to flip images from an animation. You can either flip them by the x axis
-     * (horizontal flip) or by the y axis (vertical flip).
+     * ### Animation's reference
      *
-     * to illustrate it we will improve our config object which contain the walk animation.
-     * Now we want 2 walk animation (walk_left and walk_right).
-     * Initially we will consider that our previous definition of the walk animation was equivalent to the
-     * walk_left animation.
+     *  Sometimes you can need to specify another animation which is a copy of another animation but with some
+     *  transformations on it, the typical case will be an animation of walking to right and another animation which
+     *  is walking to left.
+     *  Frames are the same except that they must be reverted horizontally.
+     *  To make it we will introduce a new entity which is the flip flags.
+     *  Flip flags allow you to flip images from an animation. You can either flip them by the x axis
+     *  (horizontal flip) or by the y axis (vertical flip).
      *
-     * Now let's see now how looks like our config object :
+     *  To illustrate it we will improve our config object which contain the walk animation.
+     *  Now we want 2 walk animation (walk_left and walk_right).
+     *  Initially we will consider that our previous definition of the walk animation was equivalent to the
+     *  walk_left animation.
+     *
+     *  Now let's see now how looks like our config object :
      *
      *     var config = {
-     *     default: {
-     *     x: 0,
-     *     y: 0,
-     *     w: 50,
-     *     h: 50,
-     *     framerate: 25
-     *     },
-     *     walk_left: {
-     *          framerate: 12,
-     *          frames: [{x:0, y:0, w: 50, h: 50},
-     *                    {x:50, y:0, w:50, h:50},
-     *                   {x:0, y:50, w:50, h:50}]
-     *     },
-     *     walk_right: {                                  //This is our new animation entry : walk_right
-     *          framerate: 12,                          //The framerate is the same than walk_left
-     *          frames: [{x:0, y:0, w:50, h:50},        //The frames are also the same than walk_left
-     *                   {x:50, y:0, w:50, h:50},
-     *                   {x:0, y:50, w:50, h:50}],
-     *          flip_x: true,                           //Flip_x true indicate that all the frames must be
+     *          default: {
+     *              x: 0,
+     *              y: 0,
+     *              w: 50,
+     *              h: 50,
+     *              framerate: 25
+     *          },
+     *          walk_left: {
+     *              framerate: 12,
+     *              frames: [
+     *                  {x:0, y:0, w: 50, h: 50 },
+     *                  {x:50, y:0, w:50, h:50 },
+     *                  {x:0, y:50, w:50, h:50 }
+     *              ]
+     *          },
+     *          walk_right: {                           //This is our new animation entry : walk_right
+     *              framerate: 12,                      //The framerate is the same than walk_left
+     *              frames: [
+     *                  {x:0, y:0, w:50, h:50},         //The frames are also the same than walk_left
+     *                  {x:50, y:0, w:50, h:50},
+     *                  {x:0, y:50, w:50, h:50}
+     *              ],
+     *              flip_x: true,                       //Flip_x true indicate that all the frames must be
      *                                                  //horizontally flipped before being draw.
-     *     }
+     *          }
      *     };
      *
-     * There's one annoying thing in the previous definition, as you can see, the frames of the walk_left animation
-     * and the frames of the walk_right animation are duplicated. There's one way to solve this problem. the alias flag.
+     *  There's one annoying thing in the previous definition, as you can see, the frames of the walk_left animation
+     *  and the frames of the walk_right animation are duplicated.
+     *  There's one way to solve this problem : the alias flag.
      *
-     * **alias flag.**
-     * Alias flag allows you to define an animation by referencing another, it's quite useful when an animation has
-     * the same frames than another. And we're actually in this case.
-     * Using the alias flag, this is what will be your config object :
+     * ### Alias flag
+     *
+     *  Alias flag allows you to define an animation by referencing another, it's quite useful when an animation has
+     *  the same frames than another. And we're actually in this case.
+     *  Using the alias flag, this is what will be your config object :
      *
      *     var config = {
-     *     default: {
-     *       x: 0,
-     *       y: 0,
-     *       w: 50,
-     *       h: 50,
-     *       framerate: 25
-     *     },
-     *     walk_left: {
-     *          framerate: 12,
-     *          frames: [{x:0, y:0, w: 50, h: 50},
-     *                    {x:50, y:0, w:50, h:50},
-     *                   {x:0, y:50, w:50, h:50}]
-     *     },
-     *     walk_right: {              //This is our new animation entry : walk_right
-     *          framerate: 12,      //The framerate is the same than walk_left
-     *          alias: "walk_left", //by declaring walk_left as alias, walk_right will share it's frames with walk_left.
-     *          flip_x: true,       //Flip_x true indicate that all the frames must be
-     *                              //horizontally flipped before being draw.
-     *     }
+     *          default: {
+     *              x: 0,
+     *              y: 0,
+     *              w: 50,
+     *              h: 50,
+     *              framerate: 25
+     *          },
+     *          walk_left: {
+     *              framerate: 12,
+     *              frames: [
+     *                  {x:0, y:0, w: 50, h: 50 },
+     *                  {x:50, y:0, w:50, h:50 },
+     *                  {x:0, y:50, w:50, h:50 }
+     *              ]
+     *          },
+     *          walk_right: {               //This is our new animation entry : walk_right
+     *              framerate: 12,          //The framerate is the same than walk_left
+     *              alias: "walk_left",     //by declaring walk_left as alias,
+     *                                      // walk_right will share it's frames with walk_left.
+     *              flip_x: true,           //Flip_x true indicate that all the frames must be
+     *                                      //horizontally flipped before being draw.
+     *          }
      *     };
      *
-     *  There's one new thing, now we want to add some frames which are a copy of the previous frame.
-     *  It can be useful in some case. For example if you want to wait more than one cycle to go on the next frame.
-     *  In this case you have to use the nb_frames flag. It works like a duplicator, if nb_frames equal 5 then it
-     *  will create 5 frames from the current frame (including the current frame). Let's duplicate 5 times the last
-     *  frame of walk_left animation.
+     * ## define frames more quickly
+     *
+     *  It's possible to define many frames in one line, if these frames follow or if they are identical.
+     *
+     *  If all frames are on the same line, or the same collumn, we can just specify the number of frames we want,
+     *  and the direction of repetition. No direction means we want to copy and repeat the frame.
+     *
+     *  Repeat a frame can be useful in some case.
+     *  For example if you want to wait more than one cycle to go on the next frame.
+     *
+     *  - `nb_frames` is the number of frames we want
+     *  - `way` is the direction we want to move for the next frames. If not defined, it's a repetition.
+     *    It can take 4 values :
+     *
+     *     - "LEFT",
+     *     - "RIGHT"
+     *     - "UP"
+     *     - "DOWN"
+     *
+     * Example :
+     *
      *
      *     var config = {
-     *     default: {
-     *     x: 0,
-     *     y: 0,
-     *     w: 50,
-     *     h: 50,
-     *     framerate: 25
-     *     },
-     *     walk_left: {
-     *          framerate: 12,
-     *          frames: [{x:0, y:0, w: 50, h: 50},
-     *                    {x:50, y:0, w:50, h:50},
-     *                   {x:0, y:50, w:50, h:50, nb_frames: 5}] //Now our last frame will be duplicated 5 times.
-     *     },
-     *     walk_right: {
-     *          framerate: 12,
-     *          alias: "walk_left",
-     *          flip_x: true
-     *     }
+     *          default: {
+     *              x: 0,
+     *              y: 0,
+     *              w: 50,
+     *              h: 50,
+     *              framerate: 25
+     *          },
+     *          walk_left: {
+     *              framerate: 12,
+     *              frames: [
+     *                  {x:0, y:0, w: 50, h: 50 },
+     *                  {x:50, y:0, w:50, h:50 },
+     *                  {x:0, y:50, w:50, h:50, nb_frames: 5 }                  //This frame will be duplicated 5 times.
+     *                  {x:0, y:100, w:50, h:50, nb_frames: 5, way: "RIGHT" }   //We take 5 frames, moving on the right.
+     *              ]
+     *          },
+     *          walk_right: {
+     *              framerate: 12,
+     *              alias: "walk_left",
+     *              flip_x: true
+     *          }
      *     };
      *
      *  Now let me introduce you the last feature which allows you to reverse the frames order of an animation.
@@ -4855,35 +4978,73 @@ var TW = TW || {};
      *  to moonwalk_right and moonwalk_right the reverse flag which will reverse the frames that the animation contains.
      *
      *     var config = {
-     *     default: {
-     *     x: 0,
-     *     y: 0,
-     *     w: 50,
-     *     h: 50,
-     *     framerate: 25
-     *     },
-     *     walk_left: {
+     *          default: {
+     *              x: 0,
+     *              y: 0,
+     *              w: 50,
+     *              h: 50,
+     *              framerate: 25
+     *          },
+     *          walk_left: {
+     *              framerate: 12,
+     *              frames: [
+     *                  {x:0, y:0, w: 50, h: 50 },
+     *                  {x:50, y:0, w:50, h:50 },
+     *                  {x:0, y:50, w:50, h:50, nb_frames: 5 },                 //This frame will be duplicated 5 times.
+     *                  {x:0, y:100, w:50, h:50, nb_frames: 5, way: "RIGHT" }   //We take 5 frames, moving on the right.
+     *              ]
+     *          },
+     *          walk_right: {
+     *              framerate: 12,
+     *              alias: "walk_left",
+     *              flip_x: true
+     *          },
+     *          moonwalk_left: {
+     *              framerate: 12,
+     *              alias: "walk_right",
+     *              reverse: true           //We set our moonwalk_left animation to be reversed.
+     *          },
+     *          moonwalk_right: {
+     *              framerate: 12,
+     *              alias: "walk_left",
+     *              reverse: true           //We set out moonwalk_right animation to be reversed.
+     *          }
+     *     };
+     *
+     * ## Hotpoint
+     *
+     * As it's possible to define frames of any size, two frames in an animation can be of differents sizes.
+     * However, this fact hides a problem : if the element must change size, how to enlarge the sprite ?
+     * by the right or the left ? Up or bottom ?
+     *
+     * Usually, we can use the `centerPoint`. If it's defined in the up-left corner,
+     * the sprite will grow toward bottom and right. If it's defined on the center, the sprite will grow from all sides.
+     *
+     * But it's not always the best choice. So, you can redefine the centerPoint for the transition
+     * with the `hotpoint` param. It can take these following values :
+     *
+     *  - `TOP-LEFT`
+     *  - `TOP-CENTER`
+     *  - `TOP-RIGHT`
+     *  - `CENTER-LEFT`
+     *  - `CENTER-CENTER`
+     *  - `CENTER-RIGHT`
+     *  - `BOTTOM-LEFT`
+     *  - `BOTTOM-CENTER`
+     *  - `BOTTOM-RIGHT`
+     *
+     *
+     * Example:
+     *
+     *     grow_up: {
      *          framerate: 12,
-     *          frames: [{x:0, y:0, w: 50, h: 50},
-     *                    {x:50, y:0, w:50, h:50},
-     *                   {x:0, y:50, w:50, h:50, nb_frames: 5}] //Now our last frame will be duplicated 5 times.
-     *     },
-     *     walk_right: {
-     *          framerate: 12,
-     *          alias: "walk_left",
-     *          flip_x: true
+     *          frames: [
+     *              {x:0, y:0, w:50, h:50 },
+     *              {x:50, y:0, w:50, h:150, hotpoint: "BOTTOM-CENTER" }
+     *              //the height grow from 50 to 150
+     *              //but the center bottom point will not move.
+     *          ]
      *     }
-     *     moonwalk_left: {
-     *          framerate: 12,
-     *          alias: "walk_right",
-     *          reverse: true           //We set our moonwalk_left animation to be reversed.
-     *     },
-     *     moonwalk_right: {
-     *          framerate: 12,
-     *          alias: "walk_left",
-     *          reverse: true           //We set out moonwalk_right animation to be reversed.
-     *    }
-     *    };
      *
      */
     function SpriteSheet(image, config) {
@@ -5059,6 +5220,7 @@ var TW = TW || {};
 	/**
 	 * The _applyHotPoint is private and set some parameters about the hot points.
 	 * @method _applyHotPoint
+	 * @param animation_entry
 	 * @param frames
 	 * @private
 	 */
@@ -5128,8 +5290,6 @@ var TW = TW || {};
      * @method addAnimation
      * @param {String} name it is the name of the animation
      * @param {Object} config it is an object which contains the description of the name animation.
-     * @return {Boolean} this method returns true if the animation have successfully been added to the SpriteSheet
-     * object otherwise it will returns false
      */
     SpriteSheet.prototype.addAnimation = function(name, config) {
         this.config[name] = TW.Utils.clone(config);
@@ -5249,9 +5409,9 @@ var TW = TW || {};
      * When you instanciate a new AnimatedSprite instance, you have to pass it the SpriteSheet which it will
      * have to use.
      * @class AnimatedSprite
+     * @extends Sprite
      * @constructor
-     * @param {Object} params
-     *   *params* is given to {{#crossLink "Graphic.Sprite"}}{{/crossLink}} constructor.
+     * @param {Object} params *params* is given to {{#crossLink "Graphic.Sprite"}}{{/crossLink}} constructor.
      *   @param {SpriteSheet} params.spriteSheet it is a SpriteSheet object which contains one or severals animation
      *   which can be used by the current AnimatedSprite object.
      */
@@ -5308,9 +5468,6 @@ var TW = TW || {};
      * - `"END:STOP"` the AnimatedSprite is now stopped,
      * - `"PAUSE"` the AnimatedSprite is now paused
      * - `"RESUME"` the animated sprite is now resumed
-     *
-     * @return {Boolean} if the animation have been finded and will be played the return value will be true,
-     * otherwise it will be false.
      */
     AnimatedSprite.prototype.play = function(name, loop, callback) {
         this.currentAnim = name;
@@ -5323,8 +5480,6 @@ var TW = TW || {};
     /**
      * The pause method allows you to pause the current animation until the resume method is called.
      * @method pause
-     * @return {Boolean} if the pause method has been successfully called, then the return value will be true,
-     * otherwise it will be false.
      */
     AnimatedSprite.prototype.pause = function() {
         this.status = "pause";
@@ -5336,7 +5491,6 @@ var TW = TW || {};
     /**
      * The resume method allows you to resume the current animation if it has been pause before.
      * @method resume
-     * @return {Boolean} return true if the resume method has been successfully called, otherwise it returns false.
      */
     AnimatedSprite.prototype.resume = function() {
         this.status = "play";
@@ -5348,7 +5502,6 @@ var TW = TW || {};
     /**
      * The stop method allows you to stop and then rewind the current animation.
      * @method stop
-     * @return {Boolean} returns true if the stop method has been successfully called. Otherwise false is returned.
      */
     AnimatedSprite.prototype.stop = function() {
         this.status = "stop";
@@ -5368,11 +5521,7 @@ var TW = TW || {};
      * otherwise it returns false.
      */
     AnimatedSprite.prototype.isPlaying = function() {
-        if (this.status === "play") {
-            return true;
-        } else {
-            return false;
-        }
+        return this.status === "play";
     };
 
     /**
