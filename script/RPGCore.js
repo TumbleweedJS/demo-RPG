@@ -6,7 +6,7 @@ DOWN:3,
 RIGHT:4
 };
 
-var RPGCore = (function(){
+define(['./TW', './Player', './TMXParser'], function(TW, Player, TMXParser) {
 
 function RPGCore() {
  this.totalElapsedTime = 0;
@@ -25,7 +25,7 @@ function RPGCore() {
  
  delete this.testAudio;
  
- this.audioManager.get(this.idSound1).sounds[0].audio.loop = true;
+ this.audioManager.get(this.idSound1)._sounds[0].audio.loop = true;
  this.playerDirection = Direction.NONE;
  this.directionPressed = [false, false, false, false, false];
  this.player = new Player(3 * 32, 2 * 32, 32, 32);
@@ -235,7 +235,7 @@ RPGCore.prototype.checkImageLoaded = function() {
    return;
   }
  }
- if (this.player.spriteSheet.image.complete === true && this.audioManager.get(this.idSound1).sounds[0].audio.readyState >= 3) {
+ if (this.player.spriteSheet.image.complete === true && this.audioManager.get(this.idSound1)._sounds[0].audio.readyState >= 3) {
 	window.clearInterval(this.loaderInterval);
 	this.onImagesLoaded();
  }
@@ -394,4 +394,4 @@ RPGCore.prototype.movePlayerRight = function() {
 
 return RPGCore;
 
-})();
+});

@@ -1,4 +1,4 @@
-var Player = (function(){
+define(['./TW'], function(TW) {
 
 function Player(x, y, w, h) {
 	this.spriteSheet = new TW.Graphic.SpriteSheet(this.createSpriteImage(), this.createSpriteSheet());
@@ -137,26 +137,26 @@ Player.prototype.createSpriteSheet = function() {
 	return spriteSheet;
 };
 
-Player.prototype.moveUp = function(speed) {
-this.animatedSprite.setPosition(this.animatedSprite.x, this.animatedSprite.y-speed);
-this.collisionBox.y-=speed;
-};
+	Player.prototype.moveUp = function(speed) {
+		this.animatedSprite.setAttr({ y: this.animatedSprite.y - speed });
+		this.collisionBox.y -= speed;
+	};
 
-Player.prototype.moveLeft = function(speed) {
-this.animatedSprite.setPosition(this.animatedSprite.x-speed, this.animatedSprite.y);
-this.collisionBox.x-=speed;
-};
+	Player.prototype.moveLeft = function(speed) {
+		this.animatedSprite.setAttr({ x: this.animatedSprite.x - speed });
+		this.collisionBox.x -= speed;
+	};
 
-Player.prototype.moveDown = function(speed) {
-this.animatedSprite.setPosition(this.animatedSprite.x, this.animatedSprite.y+speed);
-this.collisionBox.y+=speed;
-};
+	Player.prototype.moveDown = function(speed) {
+		this.animatedSprite.setAttr({ y: this.animatedSprite.y + speed });
+		this.collisionBox.y += speed;
+	};
 
-Player.prototype.moveRight = function(speed) {
-this.animatedSprite.setPosition(this.animatedSprite.x+speed, this.animatedSprite.y);
-this.collisionBox.x+=speed;
-};
+	Player.prototype.moveRight = function(speed) {
+		this.animatedSprite.setAttr({ x: this.animatedSprite.x + speed });
+		this.collisionBox.x += speed;
+	};
 
 return Player;
 
-})();
+});

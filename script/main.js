@@ -1,3 +1,4 @@
+
 var LoadingScreen = (function() {
  function loadingScreen(rpgCore) {
   this.loaded = false;
@@ -5,7 +6,7 @@ var LoadingScreen = (function() {
   this.characterSpritesheet = rpgCore.player.spriteSheet.image;
   //Le plus 2 est present pour la spritsheet du personnage et pour le son.
   this.nbRessources = this.imagesToLoad.length + 2;
-  this.audio = rpgCore.audioManager.get(rpgCore.idSound1).sounds[0].audio;
+  this.audio = rpgCore.audioManager.get(rpgCore.idSound1)._sounds[0].audio;
  }
  
  loadingScreen.prototype.draw = function() {
@@ -64,28 +65,32 @@ var LoadingScreen = (function() {
 })();
 
 
+requirejs.config({
+	baseUrl: 'script',
+});
 
+define(['./TW', './RPGCore'], function(TW, RPGCore) {
 
-
-window.onload = function start() {
-	this.gameloop = new TW.Gameloop.Gameloop();
+	this.gameloop = new TW.GameLogic.Gameloop();
 	this.rpgCore = new RPGCore();
 	this.rpgCore.setDebug(false);
 	this.rpgCore.onImagesLoaded = launchGame.bind(this);
 	this.rpgCore.gameloop = gameloop;
 	this.rpgCore.loadMap("map.xml");
 	this.gameloop.start();
-};
 
-function launchGame() {
-	this.rpgCore.loadingScreen.loaded = true;
-	this.listener = this.rpgCore.keyboard.addListener("KEY_SPACE", TW.Event.KeyboardInput.KEY_PRESSED, startGame.bind(this));
-}
 
-function startGame() {
-	this.rpgCore.keyboard.rmListener(this.listener);
-	this.rpgCore.playSound();
-	this.gameloop.rmObject(this.rpgCore.loadingScreen);
-	this.gameloop.addObject(this.rpgCore.window);	
-	this.gameloop.addObject(this.rpgCore);
-}
+	function launchGame() {
+		this.rpgCore.loadingScreen.loaded = true;
+		this.listener = this.rpgCore.keyboard.addListener("KEY_SPACE", TW.Event.KeyboardInput.KEY_PRESSED, startGame.bind(this));
+	}
+
+	function startGame() {
+		this.rpgCore.keyboard.rmListener(this.listener);
+		this.rpgCore.playSound();
+		this.gameloop.rmObject(this.rpgCore.loadingScreen);
+		this.gameloop.addObject(this.rpgCore.window);	
+		this.gameloop.addObject(this.rpgCore);
+	}
+
+});

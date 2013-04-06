@@ -1,4 +1,5 @@
-var TMXParser = (function TMXParser() {
+define(['./TW'], function(TW) {
+
   function TMXParser() {
    this.rootLayer = null;
    this.xmlObject = null;
@@ -200,4 +201,4 @@ var TMXParser = (function TMXParser() {
   };
 
   return TMXParser;
-})();
+});
