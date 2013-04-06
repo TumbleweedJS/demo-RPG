@@ -13,17 +13,11 @@ function RPGCore() {
  this.debug = false;
  this.pause = false;
  this.playerOrientation = Direction.DOWN;
- 
- this.testAudio = new Audio();
- 
+
+
  this.audioManager = new TW.Audio.Manager;
- if (this.testAudio.canPlayType("audio/ogg") != "") {
- this.idSound1 = this.audioManager.add("ressources/Music/main.ogg", 1);
- } else {
- this.idSound1 = this.audioManager.add("ressources/Music/main.mp3", 1);
- }
- 
- delete this.testAudio;
+ this.idSound1 = this.audioManager.add(["ressources/Music/main.ogg",
+									   "ressources/Music/main.mp3"], 1);
  
  this.audioManager.get(this.idSound1)._sounds[0].audio.loop = true;
  this.playerDirection = Direction.NONE;
