@@ -1,12 +1,12 @@
-define(['./TW'], function(TW) {
+define(['TW/Graphic/SpriteSheet', 'TW/Graphic/AnimatedSprite', 'TW/Collision/CollisionBox'], function(SpriteSheet, AnimatedSprite, CollisionBox) {
 
 function Player(x, y, w, h) {
-	this.spriteSheet = new TW.Graphic.SpriteSheet(this.createSpriteImage(), this.createSpriteSheet());
-	this.animatedSprite = new TW.Graphic.AnimatedSprite({x:x, y:y, width:w, height:h, spriteSheet: this.spriteSheet});
+	this.spriteSheet = new SpriteSheet(this.createSpriteImage(), this.createSpriteSheet());
+	this.animatedSprite = new AnimatedSprite({x:x, y:y, width:w, height:h, spriteSheet: this.spriteSheet});
 	this.sprint = false;
 	this.currentAnimation = "stand_down";
 	this.playAnimation("stand_down");
-	this.collisionBox = new TW.Collision.CollisionBox(x + 10, y + 16, 12, 16);
+	this.collisionBox = new CollisionBox(x + 10, y + 16, 12, 16);
 }
 
 Player.prototype.startRunning = function() {

@@ -1,4 +1,4 @@
-define(['./TW'], function(TW) {
+define(['./TW/Graphic/Layer', 'TW/Graphic/Sprite', 'TW/Collision/CollisionBox'], function(Layer, Sprite, CollisionBox) {
 
   function TMXParser() {
    this.rootLayer = null;
@@ -44,7 +44,7 @@ define(['./TW'], function(TW) {
 	this.tileHeight = parseInt(mapNode.getAttribute("tileheight"));
 	this.numberOfTileInWidth = parseInt(mapNode.getAttribute("width"));
 	this.numberOfTileInHeight = parseInt(mapNode.getAttribute("height"));
-	this.rootLayer = new TW.Graphic.Layer({x:0,y:0,width:(this.numberOfTileInWidth * this.tileWidth), height:(this.numberOfTileInHeight * this.tileHeight)});
+	this.rootLayer = new Layer({x:0,y:0,width:(this.numberOfTileInWidth * this.tileWidth), height:(this.numberOfTileInHeight * this.tileHeight)});
 	this.tilesets = mapNode.getElementsByTagName("tileset");
 	this.createTileModelsFromTileSets(this.tilesets);
 	this.layers = mapNode.getElementsByTagName("layer");
@@ -128,10 +128,10 @@ define(['./TW'], function(TW) {
 	if (tileList[i].getAttribute("gid") != "0") {
 	 var tileModel = this.getTileModelFromGID(parseInt(tileList[i].getAttribute("gid")));
 	 if (tileModel) {
-	 var collisionBox = new TW.Collision.CollisionBox(x * tileModel.width,
-														   y * tileModel.height,
-														   tileModel.width,
-														   tileModel.height);
+	 var collisionBox = new CollisionBox(x * tileModel.width,
+										 y * tileModel.height,
+										 tileModel.width,
+										 tileModel.height);
 	this.collisionList.push(collisionBox);
 	 }
 	}
@@ -145,7 +145,7 @@ define(['./TW'], function(TW) {
 
 	for (i = 0; i < layers.length; i++) {
 		if (layers[i].getAttribute("name") != "collision") {
-		 layer = new TW.Graphic.Layer({x:0, y:0, width:(this.numberOfTileInWidth * this.tileWidth), height:(this.numberOfTileInHeight * this.tileHeight),zIndex: zIndex});
+		 layer = new Layer({x:0, y:0, width:(this.numberOfTileInWidth * this.tileWidth), height:(this.numberOfTileInHeight * this.tileHeight),zIndex: zIndex});
 		 if (layers[i].getAttribute("name") === "baseGround") {
 		  zIndex++;
 		  this.zIndexPlayer = zIndex;
@@ -176,7 +176,7 @@ define(['./TW'], function(TW) {
 			}
 			var imageSprite = tileModel.image;
 			var spriteImageRect;
-			sprite = new TW.Graphic.Sprite({x:(x*this.tileWidth),
+			sprite = new Sprite({x:(x*this.tileWidth),
 											y:(y*this.tileHeight),
 											width:(tileModel.width),
 											height:(tileModel.height),

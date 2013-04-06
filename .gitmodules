@@ -1,0 +1,3 @@
+[submodule "script/TW"]
+	path = script/TW
+	url = git@github.com:TumbleweedJS/TumbleweedJS.git

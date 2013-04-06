@@ -67,11 +67,14 @@ var LoadingScreen = (function() {
 
 requirejs.config({
 	baseUrl: 'script',
+	paths: {
+		TW: 'TW/modules'
+	}
 });
 
-define(['./TW', './RPGCore'], function(TW, RPGCore) {
+define(['TW/GameLogic/Gameloop', 'TW/Event/KeyboardInput', './RPGCore'], function(Gameloop, KeyboardInput, RPGCore) {
 
-	this.gameloop = new TW.GameLogic.Gameloop();
+	this.gameloop = new Gameloop();
 	this.rpgCore = new RPGCore();
 	this.rpgCore.setDebug(false);
 	this.rpgCore.onImagesLoaded = launchGame.bind(this);
@@ -82,7 +85,7 @@ define(['./TW', './RPGCore'], function(TW, RPGCore) {
 
 	function launchGame() {
 		this.rpgCore.loadingScreen.loaded = true;
-		this.listener = this.rpgCore.keyboard.addListener("KEY_SPACE", TW.Event.KeyboardInput.KEY_PRESSED, startGame.bind(this));
+		this.listener = this.rpgCore.keyboard.addListener("KEY_SPACE", KeyboardInput.KEY_PRESSED, startGame.bind(this));
 	}
 
 	function startGame() {

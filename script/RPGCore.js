@@ -6,7 +6,8 @@ DOWN:3,
 RIGHT:4
 };
 
-define(['./TW', './Player', './TMXParser'], function(TW, Player, TMXParser) {
+define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 'TW/Event/KeyboardInput', './Player', './TMXParser'],
+	   function(Manager, Window, TrackingCamera, KeyboardInput, Player, TMXParser) {
 
 function RPGCore() {
  this.totalElapsedTime = 0;
@@ -15,7 +16,7 @@ function RPGCore() {
  this.playerOrientation = Direction.DOWN;
 
 
- this.audioManager = new TW.Audio.Manager;
+ this.audioManager = new Manager;
  this.idSound1 = this.audioManager.add(["ressources/Music/main.ogg",
 									   "ressources/Music/main.mp3"], 1);
  
@@ -23,37 +24,37 @@ function RPGCore() {
  this.playerDirection = Direction.NONE;
  this.directionPressed = [false, false, false, false, false];
  this.player = new Player(3 * 32, 2 * 32, 32, 32);
- this.window = new TW.Graphic.Window(document.getElementById("myCanvas"));
+ this.window = new Window(document.getElementById("myCanvas"));
 
-	this.window.camera = new TW.Graphic.TrackingCamera(this.player.animatedSprite);
+	this.window.camera = new TrackingCamera(this.player.animatedSprite);
 	this.window.camera.margin = {
 		x: 100,
 		y: 100
 	};
 
  this.listCollisionBox = [];
- this.keyboard = new TW.Event.KeyboardInput();
- this.keyboard.addListener("KEY_W", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerUp.bind(this));
- this.keyboard.addListener("KEY_S", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerDown.bind(this));
+ this.keyboard = new KeyboardInput();
+ this.keyboard.addListener("KEY_W", KeyboardInput.KEY_PRESSED, this.movePlayerUp.bind(this));
+ this.keyboard.addListener("KEY_S", KeyboardInput.KEY_PRESSED, this.movePlayerDown.bind(this));
  this.keyboard.addListener("KEY_A", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerLeft.bind(this));
- this.keyboard.addListener("KEY_D", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerRight.bind(this));
- this.keyboard.addListener("KEY_UP", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerUp.bind(this));
- this.keyboard.addListener("KEY_DOWN", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerDown.bind(this));
- this.keyboard.addListener("KEY_LEFT", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerLeft.bind(this));
- this.keyboard.addListener("KEY_RIGHT", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerRight.bind(this));
- this.keyboard.addListener("KEY_SHIFT", TW.Event.KeyboardInput.KEY_PRESSED, this.startPlayerSprint.bind(this));
- this.keyboard.addListener("KEY_M", TW.Event.KeyboardInput.KEY_PRESSED, this.muteUnmuteMusic.bind(this));
- this.keyboard.addListener("KEY_P", TW.Event.KeyboardInput.KEY_PRESSED, this.pauseResume.bind(this));
+ this.keyboard.addListener("KEY_D", KeyboardInput.KEY_PRESSED, this.movePlayerRight.bind(this));
+ this.keyboard.addListener("KEY_UP", KeyboardInput.KEY_PRESSED, this.movePlayerUp.bind(this));
+ this.keyboard.addListener("KEY_DOWN", KeyboardInput.KEY_PRESSED, this.movePlayerDown.bind(this));
+ this.keyboard.addListener("KEY_LEFT", KeyboardInput.KEY_PRESSED, this.movePlayerLeft.bind(this));
+ this.keyboard.addListener("KEY_RIGHT", KeyboardInput.KEY_PRESSED, this.movePlayerRight.bind(this));
+ this.keyboard.addListener("KEY_SHIFT", KeyboardInput.KEY_PRESSED, this.startPlayerSprint.bind(this));
+ this.keyboard.addListener("KEY_M", KeyboardInput.KEY_PRESSED, this.muteUnmuteMusic.bind(this));
+ this.keyboard.addListener("KEY_P", KeyboardInput.KEY_PRESSED, this.pauseResume.bind(this));
 
- this.keyboard.addListener("KEY_W", TW.Event.KeyboardInput.KEY_RELEASED, this.stopMovingUp.bind(this));
- this.keyboard.addListener("KEY_S", TW.Event.KeyboardInput.KEY_RELEASED, this.stopMovingDown.bind(this));
- this.keyboard.addListener("KEY_A", TW.Event.KeyboardInput.KEY_RELEASED, this.stopMovingLeft.bind(this));
- this.keyboard.addListener("KEY_D", TW.Event.KeyboardInput.KEY_RELEASED, this.stopMovingRight.bind(this));
- this.keyboard.addListener("KEY_UP", TW.Event.KeyboardInput.KEY_RELEASED, this.stopMovingUp.bind(this));
- this.keyboard.addListener("KEY_DOWN", TW.Event.KeyboardInput.KEY_RELEASED, this.stopMovingDown.bind(this));
- this.keyboard.addListener("KEY_LEFT", TW.Event.KeyboardInput.KEY_RELEASED, this.stopMovingLeft.bind(this));
- this.keyboard.addListener("KEY_RIGHT", TW.Event.KeyboardInput.KEY_RELEASED, this.stopMovingRight.bind(this));
- this.keyboard.addListener("KEY_SHIFT", TW.Event.KeyboardInput.KEY_RELEASED, this.stopPlayerSprint.bind(this));
+ this.keyboard.addListener("KEY_W", KeyboardInput.KEY_RELEASED, this.stopMovingUp.bind(this));
+ this.keyboard.addListener("KEY_S", KeyboardInput.KEY_RELEASED, this.stopMovingDown.bind(this));
+ this.keyboard.addListener("KEY_A", KeyboardInput.KEY_RELEASED, this.stopMovingLeft.bind(this));
+ this.keyboard.addListener("KEY_D", KeyboardInput.KEY_RELEASED, this.stopMovingRight.bind(this));
+ this.keyboard.addListener("KEY_UP", KeyboardInput.KEY_RELEASED, this.stopMovingUp.bind(this));
+ this.keyboard.addListener("KEY_DOWN", KeyboardInput.KEY_RELEASED, this.stopMovingDown.bind(this));
+ this.keyboard.addListener("KEY_LEFT", KeyboardInput.KEY_RELEASED, this.stopMovingLeft.bind(this));
+ this.keyboard.addListener("KEY_RIGHT", KeyboardInput.KEY_RELEASED, this.stopMovingRight.bind(this));
+ this.keyboard.addListener("KEY_SHIFT", KeyboardInput.KEY_RELEASED, this.stopPlayerSprint.bind(this));
 }
 
 RPGCore.prototype.pauseResume = function() {
