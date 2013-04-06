@@ -1,4 +1,4 @@
-define(['TW/Graphic/SpriteSheet', 'TW/Graphic/AnimatedSprite', 'TW/Collision/CollisionBox'], function(SpriteSheet, AnimatedSprite, CollisionBox) {
+define(['TW/Graphic/SpriteSheet', 'TW/Graphic/AnimatedSprite', 'TW/Collision/CollisionBox', 'TW/Graphic/Rect'], function(SpriteSheet, AnimatedSprite, CollisionBox, Rect) {
 
 function Player(x, y, w, h) {
 	this.spriteSheet = new SpriteSheet(this.createSpriteImage(), this.createSpriteSheet());
@@ -7,6 +7,7 @@ function Player(x, y, w, h) {
 	this.currentAnimation = "stand_down";
 	this.playAnimation("stand_down");
 	this.collisionBox = new CollisionBox(x + 10, y + 16, 12, 16);
+	//this.rect = new Rect({x: x + 10, y: y + 16, width: 12, height: 16, color: '#FF0000', mode: "FILLED", zIndex: 1000});
 }
 
 Player.prototype.startRunning = function() {
@@ -140,21 +141,31 @@ Player.prototype.createSpriteSheet = function() {
 	Player.prototype.moveUp = function(speed) {
 		this.animatedSprite.setAttr({ y: this.animatedSprite.y - speed });
 		this.collisionBox.y -= speed;
+		//this.rect.setAttr({y: this.collisionBox.y } );
 	};
 
 	Player.prototype.moveLeft = function(speed) {
 		this.animatedSprite.setAttr({ x: this.animatedSprite.x - speed });
 		this.collisionBox.x -= speed;
+		//this.rect.setAttr({x: this.collisionBox.x } );
 	};
 
 	Player.prototype.moveDown = function(speed) {
 		this.animatedSprite.setAttr({ y: this.animatedSprite.y + speed });
 		this.collisionBox.y += speed;
+		//this.rect.setAttr({y: this.collisionBox.y } );
 	};
 
 	Player.prototype.moveRight = function(speed) {
 		this.animatedSprite.setAttr({ x: this.animatedSprite.x + speed });
 		this.collisionBox.x += speed;
+		//this.rect.setAttr({x: this.collisionBox.x } );
+	};
+
+	Player.prototype.move = function(x, y) {
+		this.collisionBox.x += x - this.animatedSprite.x;
+		this.collisionBox.y += y - this.animatedSprite.y;
+		this.animatedSprite.setAttr({ x: x, y: y });
 	};
 
 return Player;

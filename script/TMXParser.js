@@ -1,54 +1,69 @@
-define(['./TW/Graphic/Layer', 'TW/Graphic/Sprite', 'TW/Collision/CollisionBox'], function(Layer, Sprite, CollisionBox) {
+define(['require', './TW/Graphic/Layer', 'TW/Graphic/Sprite', 'TW/Collision/CollisionBox', 'TW/Graphic/Rect'], function(require, Layer, Sprite, CollisionBox, Rect) {
 
   function TMXParser() {
-   this.rootLayer = null;
-   this.xmlObject = null;
-   this.tileWidth;
-   this.tileHeight;
-   this.numberOfTileInWidth;
-   this.numberOfTileInHeight;
-   this.tilesets = null;
-   this.tilemodels = [];
-   this.layers = null; 
-   this.images = [];
-   this.collisionList = [];
+	  this.xmlObject = null;
+	  this.rootLayer = null;
+
+	  /** map config **/
+	  this.tileWidth;
+	  this.tileHeight;
+	  this.numberOfTileInWidth;
+	  this.numberOfTileInHeight;
+
+	  /** Xml nodes **/
+	  this.tilesets = null;
+	  this.layers = null; 
+	  this.objectgroups = [];
+
+	  /** tilesets data **/
+	  this.tilemodels = [];
+	  this.images = [];
+
+	  /** collision AABB **/
+	  this.collisionList = [];
+
+	  this.zoneList = [];
   }
 
   //Prend en entree l'objet XML qui contient le descriptif du fichier TMX.
   TMXParser.prototype.parseXML = function(xmlObject) {
-	if (xmlObject.hasChildNodes()) {
-		var childNodes = xmlObject.childNodes;
-		var i;
-		for (i = 0; i < childNodes.length; i++) {
-		  if (!childNodes[i].tagName) {
-		   continue;
+	  if (xmlObject.hasChildNodes()) {
+		  var childNodes = xmlObject.childNodes;
+		  var i;
+		  for (i = 0; i < childNodes.length; i++) {
+			  if (childNodes[i].tagName === "map") {
+				  this.xmlObject = xmlObject;
+				  this.parseMap(childNodes[i]);
+				  return this.rootLayer;
+			  }
 		  }
-		  if (childNodes[i].tagName === "map") {
-		   this.xmlObject = xmlObject;
-		   this.parseMap(childNodes[i]);
-		   return this.rootLayer;
-		  }
-		}
-		return null;
-	}
+		  return null;
+	  }
   };
   
   //Permet de recuperer la liste de tiles de collisions fournis par le fichier TMX.
   TMXParser.prototype.getCollisionList = function() {
 	return this.collisionList;
   };
-  
+
   //Prend en entree le noeud de l'objet XML qui contient la map
   TMXParser.prototype.parseMap = function(mapNode) {
-	this.tileWidth = parseInt(mapNode.getAttribute("tilewidth"));
-	this.tileHeight = parseInt(mapNode.getAttribute("tileheight"));
-	this.numberOfTileInWidth = parseInt(mapNode.getAttribute("width"));
-	this.numberOfTileInHeight = parseInt(mapNode.getAttribute("height"));
-	this.rootLayer = new Layer({x:0,y:0,width:(this.numberOfTileInWidth * this.tileWidth), height:(this.numberOfTileInHeight * this.tileHeight)});
-	this.tilesets = mapNode.getElementsByTagName("tileset");
-	this.createTileModelsFromTileSets(this.tilesets);
-	this.layers = mapNode.getElementsByTagName("layer");
-	this.buildLayers(this.layers);
+	  this.tileWidth = parseInt(mapNode.getAttribute("tilewidth"));
+	  this.tileHeight = parseInt(mapNode.getAttribute("tileheight"));
+	  this.numberOfTileInWidth = parseInt(mapNode.getAttribute("width"));
+	  this.numberOfTileInHeight = parseInt(mapNode.getAttribute("height"));
+	  this.rootLayer = new Layer({
+		  x: 0,
+		  y: 0,
+		  width: (this.numberOfTileInWidth * this.tileWidth),
+		  height: (this.numberOfTileInHeight * this.tileHeight)
+	  });
+	  this.tilesets = mapNode.getElementsByTagName("tileset");
+	  this.createTileModelsFromTileSets(this.tilesets);
+	  this.layers = mapNode.getElementsByTagName("layer");
+	  this.buildLayers(this.layers);
+	  this.objectgroups = mapNode.getElementsByTagName("objectgroup");
+	  this.parseAllObjectGroups();
   };
   
   TMXParser.prototype.createTileModelsFromTileSets = function(tileSets){
@@ -114,50 +129,28 @@ define(['./TW/Graphic/Layer', 'TW/Graphic/Sprite', 'TW/Collision/CollisionBox'],
 		}
 	}
   };
-  
-  TMXParser.prototype.fillCollisionList = function(layer) {
-   var tileList = layer.getElementsByTagName("tile");
-   var length = tileList.length;
-   var i;
-   var x;
-   var y;
-   
-   for (i = 0; i < length; i++) {
-    x = i % this.numberOfTileInWidth;
-	y = Math.floor(i / this.numberOfTileInWidth);
-	if (tileList[i].getAttribute("gid") != "0") {
-	 var tileModel = this.getTileModelFromGID(parseInt(tileList[i].getAttribute("gid")));
-	 if (tileModel) {
-	 var collisionBox = new CollisionBox(x * tileModel.width,
-										 y * tileModel.height,
-										 tileModel.width,
-										 tileModel.height);
-	this.collisionList.push(collisionBox);
-	 }
-	}
-   }
-  };
-  
+    
   TMXParser.prototype.buildLayers = function(layers) {
-	var i;
-	var layer;
-	var zIndex = 1;
+	  var layer;
+	  var zIndex = 1;
 
-	for (i = 0; i < layers.length; i++) {
-		if (layers[i].getAttribute("name") != "collision") {
-		 layer = new Layer({x:0, y:0, width:(this.numberOfTileInWidth * this.tileWidth), height:(this.numberOfTileInHeight * this.tileHeight),zIndex: zIndex});
-		 if (layers[i].getAttribute("name") === "baseGround") {
+	  for (var i = 0; i < layers.length; i++) {
+		  layer = new Layer({
+			  x: 0,
+			  y: 0,
+			  width: this.numberOfTileInWidth * this.tileWidth,
+			  height: this.numberOfTileInHeight * this.tileHeight,
+			  zIndex: zIndex
+		  });
+		  //TODO: virer pour un objet sur la map ?
+		  if (layers[i].getAttribute("name") === "baseGround") {
+			  zIndex++;
+			  this.zIndexPlayer = zIndex;
+		  }
 		  zIndex++;
-		  this.zIndexPlayer = zIndex;
-		 }
-		 zIndex++;
-		 this.rootLayer.addChild(layer);
-		 this.fillLayerWithTiles(layer, layers[i]);
-		} else
-		{
-		 this.fillCollisionList(layers[i]);
-		}
-	}
+		  this.rootLayer.addChild(layer);
+		  this.fillLayerWithTiles(layer, layers[i]);
+	  }
   };
   
   TMXParser.prototype.fillLayerWithTiles = function(tumbleweedLayer, TMXLayer) {
@@ -199,6 +192,109 @@ define(['./TW/Graphic/Layer', 'TW/Graphic/Sprite', 'TW/Collision/CollisionBox'],
   
   TMXParser.prototype.parseJSON = function(jsonObject) {
   };
+
+	/**
+	 * parse all `<objectgroup>` tags.
+	 *
+	 * @method parseAllObjectGroups
+	 */
+	TMXParser.prototype.parseAllObjectGroups = function() {
+		for (var i = 0; i < this.objectgroups.length; i++) {
+			this.parseObjectGroup(this.objectgroups[i]);
+		}
+	};
+
+	/**
+	 * Parse a `<objectgroup>` tag.
+	 * @method parseObjectGroup
+	 * @param {XMLNode} group 
+	 */
+	TMXParser.prototype.parseObjectGroup = function(group) {
+		var objects = group.getElementsByTagName('object');
+		var length = objects.length;
+
+		for (var i = 0; i < length; i++) {
+			if (objects[i].getElementsByTagName('ellipse').length) {
+				console.warn('TMXParser: ellipse are not supported; ignored.');
+			}
+			else if (objects[i].getElementsByTagName('polygon').length) {
+				console.warn('TMXParser: polygon are not supported; ignored.');
+			}
+			else if (objects[i].getElementsByTagName('polyline').length) {
+				console.warn('TMXParser: polyline are not supported; ignored.');
+			}
+			else if (objects[i].hasAttribute('gid').length) {
+				console.warn('TMXParser: tiles are not supported in objectgroup; ignored.');
+			} else {
+				var width = objects[i].getAttribute('width') || 20;
+				var height = objects[i].getAttribute('height') || 20;
+				this.parseObject(objects[i]);
+			}
+		}
+	};
+
+	/**
+	 * parse an `<object>` tag.
+	 *
+	 * aT this point, the tag is always a rectangle.
+	 *
+	 * @method parseObject
+	 * @param {XMLNode} object
+	 */
+	TMXParser.prototype.parseObject = function(object) {
+		var type = object.getAttribute('type');
+		switch (type) {
+		case 'collision':
+			var AABB = new CollisionBox(parseInt(object.getAttribute('x')),
+										parseInt(object.getAttribute('y')),
+										parseInt(object.getAttribute('width')),
+										parseInt(object.getAttribute('height')));
+			this.collisionList.push(AABB);
+			break;
+		case 'zone':
+			require(['trigger/' + object.getAttribute('name') ], function(trigger) {
+				var AABB = new CollisionBox(parseInt(object.getAttribute('x')),
+											parseInt(object.getAttribute('y')),
+											parseInt(object.getAttribute('width')),
+											parseInt(object.getAttribute('height')));
+				this.zoneList.push({
+					zone: AABB,
+					trigger: trigger,
+					isInZone: false,
+					properties: this.parseProperties(object)
+				});
+			}.bind(this));
+			break;
+		default:
+			console.warn('TMXParser: Unknow type object: ' + type);
+			break;
+		}
+	}
+
+	/**
+	 * Parse All `<property>` in the `<properties>` child tag.
+	 * If a property is set two times or more, result will be an array with all values.
+	 *
+	 * @method parseProperties
+	 * @param {XMLNode} node
+	 * @return {Object} object containing all properties.
+	 */
+	TMXParser.prototype.parseProperties = function(node) {
+		var obj = {};
+		var list = node.getElementsByTagName('property');
+		for (var i = 0; i < list.length; i++) {
+			var name = list[i].getAttribute('name');
+			var value = list[i].getAttribute('value');
+			if (obj[name] !== "undefined") {
+				obj[name] = value;
+			} else if (obj[name] instanceof Array) {
+				obj[name].push(value);
+			} else {
+				obj[name] = [ obj[name], value];
+			}
+		}
+		return obj;
+	};
 
   return TMXParser;
 });
