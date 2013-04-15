@@ -1,28 +1,17 @@
-var Direction = {
-	NONE:0,
-	UP:1,
-	LEFT:2,
-	DOWN:3,
-	RIGHT:4
-};
 
-define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 'TW/Event/KeyboardInput', './Player', './TMXParser'],
-	   function(Manager, Window, TrackingCamera, KeyboardInput, Player, TMXParser) {
+define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 'TW/Event/KeyboardInput', './Player', './TMXParser', 'TW/Event/InputMapper'],
+	   function(Manager, Window, TrackingCamera, KeyboardInput, Player, TMXParser, InputMapper) {
 
 		   function RPGCore() {
 			   this.totalElapsedTime = 0;
 			   this.debug = false;
 			   this.pause = false;
-			   this.playerOrientation = Direction.DOWN;
-
 
 			   this.audioManager = new Manager;
 			   this.idSound1 = this.audioManager.add(["ressources/Music/main.ogg",
 													  "ressources/Music/main.mp3"], 1);
 			   
 			   this.audioManager.get(this.idSound1)._sounds[0].audio.loop = true;
-			   this.playerDirection = Direction.NONE;
-			   this.directionPressed = [false, false, false, false, false];
 			   this.player = new Player(3 * 32, 2 * 32, 32, 32);
 			   this.window = new Window(document.getElementById("myCanvas"));
 
@@ -34,27 +23,32 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 
 			   this.listCollisionBox = [];
 			   this.keyboard = new KeyboardInput();
-			   this.keyboard.addListener("KEY_W", KeyboardInput.KEY_PRESSED, this.movePlayerUp.bind(this));
-			   this.keyboard.addListener("KEY_S", KeyboardInput.KEY_PRESSED, this.movePlayerDown.bind(this));
-			   this.keyboard.addListener("KEY_A", TW.Event.KeyboardInput.KEY_PRESSED, this.movePlayerLeft.bind(this));
-			   this.keyboard.addListener("KEY_D", KeyboardInput.KEY_PRESSED, this.movePlayerRight.bind(this));
-			   this.keyboard.addListener("KEY_UP", KeyboardInput.KEY_PRESSED, this.movePlayerUp.bind(this));
-			   this.keyboard.addListener("KEY_DOWN", KeyboardInput.KEY_PRESSED, this.movePlayerDown.bind(this));
-			   this.keyboard.addListener("KEY_LEFT", KeyboardInput.KEY_PRESSED, this.movePlayerLeft.bind(this));
-			   this.keyboard.addListener("KEY_RIGHT", KeyboardInput.KEY_PRESSED, this.movePlayerRight.bind(this));
-			   this.keyboard.addListener("KEY_SHIFT", KeyboardInput.KEY_PRESSED, this.startPlayerSprint.bind(this));
-			   this.keyboard.addListener("KEY_M", KeyboardInput.KEY_PRESSED, this.muteUnmuteMusic.bind(this));
-			   this.keyboard.addListener("KEY_P", KeyboardInput.KEY_PRESSED, this.pauseResume.bind(this));
+			   this.mapper = new InputMapper();
+			   this.mapper.allowMultiInput = true;
+			   this.mapper.bindEvent("MOVE_UP", "KEY_W", this.keyboard)
+				   .bindEvent("MOVE_UP", "KEY_UP", this.keyboard)
+				   .bindEvent("MOVE_DOWN", "KEY_S", this.keyboard)
+				   .bindEvent("MOVE_DOWN", "KEY_DOWN", this.keyboard)
+				   .bindEvent("MOVE_LEFT", "KEY_A", this.keyboard)
+				   .bindEvent("MOVE_LEFT", "KEY_LEFT", this.keyboard)
+				   .bindEvent("MOVE_RIGHT", "KEY_D", this.keyboard)
+				   .bindEvent("MOVE_RIGHT", "KEY_RIGHT", this.keyboard)
+				   .bindEvent("SPRINT", "KEY_SHIFT", this.keyboard)
+				   .on("MOVE_UP", this.movePlayerDir.bind(this, "up"), KeyboardInput.isPressed)
+				   .on("MOVE_DOWN", this.movePlayerDir.bind(this, "down"), KeyboardInput.isPressed)
+				   .on("MOVE_LEFT", this.movePlayerDir.bind(this, "left"), KeyboardInput.isPressed)
+				   .on("MOVE_RIGHT", this.movePlayerDir.bind(this, "right"), KeyboardInput.isPressed)
+				   .on("MOVE_UP", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
+				   .on("MOVE_DOWN", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
+				   .on("MOVE_LEFT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
+				   .on("MOVE_RIGHT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
+				   .on("SPRINT", this.startPlayerSprint.bind(this), KeyboardInput.isPressed);
+			   
+			   
+			   this.keyboard.on("KEY_M", this.muteUnmuteMusic.bind(this), KeyboardInput.isPressed);
+			   this.keyboard.on("KEY_P", this.pauseResume.bind(this), KeyboardInput.isPressed);
+			   this.keyboard.on("KEY_SHIFT", this.stopPlayerSprint.bind(this), KeyboardInput.isReleased);
 
-			   this.keyboard.addListener("KEY_W", KeyboardInput.KEY_RELEASED, this.stopMovingUp.bind(this));
-			   this.keyboard.addListener("KEY_S", KeyboardInput.KEY_RELEASED, this.stopMovingDown.bind(this));
-			   this.keyboard.addListener("KEY_A", KeyboardInput.KEY_RELEASED, this.stopMovingLeft.bind(this));
-			   this.keyboard.addListener("KEY_D", KeyboardInput.KEY_RELEASED, this.stopMovingRight.bind(this));
-			   this.keyboard.addListener("KEY_UP", KeyboardInput.KEY_RELEASED, this.stopMovingUp.bind(this));
-			   this.keyboard.addListener("KEY_DOWN", KeyboardInput.KEY_RELEASED, this.stopMovingDown.bind(this));
-			   this.keyboard.addListener("KEY_LEFT", KeyboardInput.KEY_RELEASED, this.stopMovingLeft.bind(this));
-			   this.keyboard.addListener("KEY_RIGHT", KeyboardInput.KEY_RELEASED, this.stopMovingRight.bind(this));
-			   this.keyboard.addListener("KEY_SHIFT", KeyboardInput.KEY_RELEASED, this.stopPlayerSprint.bind(this));
 		   }
 
 		   RPGCore.prototype.pauseResume = function() {
@@ -62,28 +56,7 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 			   if (this.pause) {
 				   this.player.animatedSprite.pause();
 			   } else {
-				   if (this.playerDirection === Direction.NONE) {
-					   this.deduceStandAnimation();
-				   } else {
-					   this.player.animatedSprite.resume();
-				   }
-			   }
-		   };
-
-		   RPGCore.prototype.deduceStandAnimation = function() {
-			   switch (this.playerOrientation) {
-			   case Direction.UP:
-				   this.player.playAnimation("stand_up");
-				   break;
-			   case Direction.LEFT:
-				   this.player.playAnimation("stand_left");
-				   break;
-			   case Direction.RIGHT:
-				   this.player.playAnimation("stand_right");
-				   break;
-			   case Direction.DOWN:
-				   this.player.playAnimation("stand_down");
-				   break;
+				   this.player.animatedSprite.resume();
 			   }
 		   };
 
@@ -110,96 +83,36 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 		   };
 
 		   RPGCore.prototype.isPlayerMoving = function() {
-			   var i;
-			   for (i = 0; i < 5; i++) {
-				   if (this.directionPressed[i] === true) {
-					   return true;
-				   }
-			   }
-			   return false;
+			   return this.mapper.get("MOVE_UP") ||
+				   this.mapper.get("MOVE_DOWN") ||
+				   this.mapper.get("MOVE_LEFT") ||
+				   this.mapper.get("MOVE_RIGHT");
 		   };
 
 		   RPGCore.prototype.deduceAnimation = function() {
-			   if (this.directionPressed[Direction.UP] === true) {
-				   this.playerDirection = Direction.UP;
-				   this.playerOrientation = Direction.UP;
-				   this.player.playAnimation("walk_up");
+			   if (this.isPlayerMoving() === false) {
+				   this.player.playAnimation("stand");
 			   }
-			   if (this.directionPressed[Direction.LEFT] === true) {
-				   this.playerDirection = Direction.LEFT;
-				   this.playerOrientation = Direction.LEFT;
-				   this.player.playAnimation("walk_left");
+			   var state = this.mapper.get("SPRINT") ? "run" : "walk";
+			   if (this.mapper.get("MOVE_UP")) {
+				   this.player.playAnimation(state, "up");
 			   }
-			   if (this.directionPressed[Direction.DOWN] === true) {
-				   this.playerDirection = Direction.DOWN;
-				   this.playerOrientation = Direction.DOWN;
-				   this.player.playAnimation("walk_down");		
+			   if (this.mapper.get("MOVE_LEFT")) {
+				   this.player.playAnimation(state, "left");
 			   }
-			   if (this.directionPressed[Direction.RIGHT] === true) {
-				   this.playerDirection = Direction.RIGHT;
-				   this.playerOrientation = Direction.RIGHT;
-				   this.player.playAnimation("walk_right");
+			   if (this.mapper.get("MOVE_DOWN")) {
+				   this.player.playAnimation(state, "down");
+			   }
+			   if (this.mapper.get("MOVE_RIGHT")) {
+				   this.player.playAnimation(state, "right");
+			   }
+			   if (this.pause) {
+				   this.player.animatedSprite.pause();
 			   }
 		   };
 
-		   RPGCore.prototype.stopMovingUp = function() {
-			   if (this.pause) {
-				   this.directionPressed[Direction.UP] = false;
-				   this.playerDirection = Direction.NONE;
-				   return;
-			   }
-			   this.directionPressed[Direction.UP] = false;
-			   if (this.isPlayerMoving() === false) {
-				   this.playerDirection = Direction.NONE;
-				   this.player.playAnimation("stand_up");
-			   } else {
-				   this.deduceAnimation();
-			   }
-		   };
-
-		   RPGCore.prototype.stopMovingDown = function() {
-			   if (this.pause) {
-				   this.directionPressed[Direction.DOWN] = false;
-				   this.playerDirection = Direction.NONE;
-				   return;
-			   }
-			   this.directionPressed[Direction.DOWN] = false;
-			   if (this.isPlayerMoving() === false) {
-				   this.playerDirection = Direction.NONE;
-				   this.player.playAnimation("stand_down");
-			   } else {
-				   this.deduceAnimation();
-			   }
-		   };
-
-		   RPGCore.prototype.stopMovingLeft = function() {
-			   if (this.pause) {
-				   this.directionPressed[Direction.LEFT] = false;
-				   this.playerDirection = Direction.NONE;
-				   return;
-			   }
-			   this.directionPressed[Direction.LEFT] = false;
-			   if (this.isPlayerMoving() === false) {
-				   this.playerDirection = Direction.NONE;
-				   this.player.playAnimation("stand_left");
-			   } else {
-				   this.deduceAnimation();
-			   }
-		   };
-
-		   RPGCore.prototype.stopMovingRight = function() {
-			   if (this.pause) {
-				   this.directionPressed[Direction.RIGHT] = false;
-				   this.playerDirection = Direction.NONE;
-				   return;
-			   }
-			   this.directionPressed[Direction.RIGHT] = false;
-			   if (this.isPlayerMoving() === false) {
-				   this.playerDirection = Direction.NONE;
-				   this.player.playAnimation("stand_right");
-			   } else {
-				   this.deduceAnimation();
-			   }
+		   RPGCore.prototype.stopMovingDir = function() {
+			   this.deduceAnimation();
 		   };
 
 		   RPGCore.prototype.loadMap = function(mapName) {
@@ -313,30 +226,29 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 		   };
 
 		   RPGCore.prototype.update = function(delta) {
-			   //console.log("orientation joueur : "+this.playerOrientation);
 			   if (this.pause === true) {
 				   return;
 			   }
 			   if ((this.totalElapsedTime + delta) > (1000 / 50)) {
-				   if (this.directionPressed[Direction.UP]) {
+				   if (this.mapper.get("MOVE_UP")) {
 					   this.player.moveUp(this.getSpeed());
 					   if (this.isPlayerCollidingAnObstacle()) {
 						   this.player.moveDown(this.getSpeed());
 					   }
 				   }
-				   if (this.directionPressed[Direction.LEFT]) {
+				   if (this.mapper.get("MOVE_LEFT")) {
 					   this.player.moveLeft(this.getSpeed());
 					   if (this.isPlayerCollidingAnObstacle()) {
 						   this.player.moveRight(this.getSpeed());
 					   }
 				   }
-				   if (this.directionPressed[Direction.DOWN]) {
+				   if (this.mapper.get("MOVE_DOWN")) {
 					   this.player.moveDown(this.getSpeed());
 					   if (this.isPlayerCollidingAnObstacle()) {
 						   this.player.moveUp(this.getSpeed());
 					   }
 				   }
-				   if (this.directionPressed[Direction.RIGHT]) {
+				   if (this.mapper.get("MOVE_RIGHT")) {
 					   this.player.moveRight(this.getSpeed());
 					   if (this.isPlayerCollidingAnObstacle()) {
 						   this.player.moveLeft(this.getSpeed());
@@ -352,50 +264,25 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 		   };
 
 		   RPGCore.prototype.movePlayerUp = function() {
-			   if (this.pause) {
-				   return;
-			   }
-			   this.playerOrientation = Direction.UP;
-			   this.directionPressed[Direction.UP] = true;
-			   if (this.playerDirection != Direction.UP) {
-				   this.playerDirection = Direction.UP;
-				   this.player.playAnimation("walk_up");
+			   var direction = "up";
+			   if (this.player.state !== "walk" || this.player.direction !== direction) {
+				   this.player.playAnimation("walk", direction);
+				   if (this.pause) {
+					   this.player.animatedSprite.pause();
+				   }
 			   }
 		   };
 
-		   RPGCore.prototype.movePlayerDown = function() {
-			   if (this.pause) {
-				   return;
-			   }
-			   this.playerOrientation = Direction.DOWN;
-			   this.directionPressed[Direction.DOWN] = true;
-			   if (this.playerDirection != Direction.DOWN) {
-				   this.playerDirection = Direction.DOWN;
-				   this.player.playAnimation("walk_down");
-			   }
-		   };
 
-		   RPGCore.prototype.movePlayerLeft = function() {
-			   if (this.pause) {
-				   return;
-			   }
-			   this.playerOrientation = Direction.LEFT;
-			   this.directionPressed[Direction.LEFT] = true;
-			   if (this.playerDirection != Direction.LEFT) {
-				   this.playerDirection = Direction.LEFT;
-				   this.player.playAnimation("walk_left");
-			   }
-		   };
-
-		   RPGCore.prototype.movePlayerRight = function() {
-			   if (this.pause) {
-				   return;
-			   }
-			   this.playerOrientation = Direction.RIGHT;
-			   this.directionPressed[Direction.RIGHT] = true;
-			   if (this.playerDirection != Direction.RIGHT) {
-				   this.playerDirection = Direction.RIGHT;
-				   this.player.playAnimation("walk_right");
+		   /**
+			* Called when a MOVE key is pressed.
+			*/
+		   RPGCore.prototype.movePlayerDir = function(direction) {
+			   if (this.player.state !== "walk" || this.player.direction !== direction) {
+				   this.player.playAnimation("walk", direction);
+				   if (this.pause) {
+					   this.player.animatedSprite.pause();
+				   }
 			   }
 		   };
 

@@ -1,87 +1,76 @@
+
 define(['TW/Graphic/SpriteSheet', 'TW/Graphic/AnimatedSprite', 'TW/Collision/CollisionBox', 'TW/Graphic/Rect'], function(SpriteSheet, AnimatedSprite, CollisionBox, Rect) {
 
-function Player(x, y, w, h) {
-	this.spriteSheet = new SpriteSheet(this.createSpriteImage(), this.createSpriteSheet());
-	this.animatedSprite = new AnimatedSprite({x:x, y:y, width:w, height:h, spriteSheet: this.spriteSheet});
-	this.sprint = false;
-	this.currentAnimation = "stand_down";
-	this.playAnimation("stand_down");
-	this.collisionBox = new CollisionBox(x + 10, y + 16, 12, 16);
-	//this.rect = new Rect({x: x + 10, y: y + 16, width: 12, height: 16, color: '#FF0000', mode: "FILLED", zIndex: 1000});
-}
+	function Player(x, y, w, h) {
+		this.spriteSheet = new SpriteSheet(this.createSpriteImage(), this.createSpriteSheet());
+		this.animatedSprite = new AnimatedSprite({x:x, y:y, width:w, height:h, spriteSheet: this.spriteSheet});
+		this.sprint = false;
 
-Player.prototype.startRunning = function() {
-		switch (this.currentAnimation) {
-			case "walk_left":
-			this.animatedSprite.play("run_left", true, null);
-			this.currentAnimation = "run_left";
-			return;
-			case "walk_up":
-			this.animatedSprite.play("run_up", true, null);
-			this.currentAnimation = "run_up";
-			return;
-			case "walk_right":
-			this.animatedSprite.play("run_right", true, null);
-			this.currentAnimation = "run_right";
-			return;
-			case "walk_down":
-			this.animatedSprite.play("run_down", true, null);
-			this.currentAnimation = "run_down";
-			return;
-		}	
-};
 
-Player.prototype.stopRunning = function() {
-		switch (this.currentAnimation) {
-			case "run_left":
-			this.animatedSprite.play("walk_left", true, null);
-			this.currentAnimation = "walk_left";
-			return;
-			case "run_up":
-			this.animatedSprite.play("walk_up", true, null);
-			this.currentAnimation = "walk_up";
-			return;
-			case "run_right":
-			this.animatedSprite.play("walk_right", true, null);
-			this.currentAnimation = "walk_right";
-			return;
-			case "run_down":
-			this.animatedSprite.play("walk_down", true, null);
-			this.currentAnimation = "walk_down";
-			return;
-		}
-};
+		this.collisionBox = new CollisionBox(x + 10, y + 16, 12, 16);
+		//this.rect = new Rect({x: x + 10, y: y + 16, width: 12, height: 16, color: '#FF0000', mode: "FILLED", zIndex: 1000});
 
-Player.prototype.createSpriteImage = function() {
-	var image = new Image();
-	image.src = "ressources/Sprites/Human/TerraSheet.png";
-	return image;
-};
+		/**
+		 * Orientation of the player.
+		 *
+		 * Can be one of these following values:
+		 *
+		 * - `"up"`
+		 * - `"down"`
+		 * - `"left"`
+		 * - `"right"`
+		 *
+		 * @property {String} direction
+		 *
+		 */
+		this.direction = "down";
 
-Player.prototype.playAnimation = function(name) {
-	if (this.sprint === true) {
-		switch (name) {
-			case "walk_left":
-			this.animatedSprite.play("run_left", true, null);
-			this.currentAnimation = "run_left";
-			return;
-			case "walk_up":
-			this.animatedSprite.play("run_up", true, null);
-			this.currentAnimation = "run_up";
-			return;
-			case "walk_right":
-			this.animatedSprite.play("run_right", true, null);
-			this.currentAnimation = "run_right";
-			return;
-			case "walk_down":
-			this.animatedSprite.play("run_down", true, null);
-			this.currentAnimation = "run_down";
-			return;
-		}
+		/**
+		 * current Player state.
+		 *
+		 * Each state correspond to an animation.
+		 * These animations are availables:
+		 *
+		 * - `"stand"`
+		 * - `"walk"`
+		 * - `"run"`
+		 *
+		 * @property {String} state
+		 */
+		this.state = "stand";
+
+		this.playAnimation("stand", "down");
+		this.currentAnimation = "stand_down";
 	}
-	this.animatedSprite.play(name, true, null);
-	this.currentAnimation = name;
-};
+
+	Player.prototype.startRunning = function() {
+		if (this.state === "walk") {
+			this.playAnimation("run");
+		}
+	};
+
+	Player.prototype.stopRunning = function() {
+		if (this.state === "run") {
+			this.playAnimation("walk");
+		}
+	};
+
+	Player.prototype.createSpriteImage = function() {
+		var image = new Image();
+		image.src = "ressources/Sprites/Human/TerraSheet.png";
+		return image;
+	};
+
+	Player.prototype.playAnimation = function(name, direction) {
+		this.state = (name === undefined) ? this.state : name;
+		this.direction = (direction === undefined) ? this.direction : direction;
+
+		if (this.sprint === true && this.state === "walk") {
+			this.state = "run";
+		}
+		this.animatedSprite.play(this.state + "_" + this.direction, true, null);
+		this.currentAnimation = this.state + "_" + this.direction;
+	};
 
 Player.prototype.pauseAnimation = function() {
 	this.animatedSprite.pause();
