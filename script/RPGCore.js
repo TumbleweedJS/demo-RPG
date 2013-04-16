@@ -42,21 +42,23 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 				   .on("MOVE_DOWN", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
 				   .on("MOVE_LEFT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
 				   .on("MOVE_RIGHT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
-				   .on("SPRINT", this.startPlayerSprint.bind(this), KeyboardInput.isPressed);
-			   
+				   .on("SPRINT", this.startPlayerSprint.bind(this), KeyboardInput.isPressed)
+				   .on("SPRINT", this.stopPlayerSprint.bind(this), KeyboardInput.isReleased);			   
 			   
 			   this.keyboard.on("KEY_M", this.muteUnmuteMusic.bind(this), KeyboardInput.isPressed);
 			   this.keyboard.on("KEY_P", this.pauseResume.bind(this), KeyboardInput.isPressed);
-			   this.keyboard.on("KEY_SHIFT", this.stopPlayerSprint.bind(this), KeyboardInput.isReleased);
+
 
 		   }
 
 		   RPGCore.prototype.pauseResume = function() {
 			   this.pause = !this.pause;
 			   if (this.pause) {
+				   this.mapper.enable(false);
 				   this.player.animatedSprite.pause();
 			   } else {
 				   this.player.animatedSprite.resume();
+				   this.mapper.enable(true);
 			   }
 		   };
 
@@ -66,16 +68,12 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 
 		   RPGCore.prototype.startPlayerSprint = function() {
 			   this.player.sprint = true;
-			   if (!this.pause) {
-				   this.player.startRunning();
-			   }
+			   this.player.startRunning();
 		   };
 
 		   RPGCore.prototype.stopPlayerSprint = function() {
 			   this.player.sprint = false;
-			   if (!this.pause) {
-				   this.player.stopRunning();
-			   }
+			   this.player.stopRunning();
 		   };
 
 		   RPGCore.prototype.playSound = function() {
@@ -106,12 +104,9 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 			   if (this.mapper.get("MOVE_RIGHT")) {
 				   this.player.playAnimation(state, "right");
 			   }
-			   if (this.pause) {
-				   this.player.animatedSprite.pause();
-			   }
 		   };
 
-		   RPGCore.prototype.stopMovingDir = function() {
+		   RPGCore.prototype.stopMovingDir = function(event) {
 			   this.deduceAnimation();
 		   };
 
@@ -263,26 +258,12 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 			   }
 		   };
 
-		   RPGCore.prototype.movePlayerUp = function() {
-			   var direction = "up";
-			   if (this.player.state !== "walk" || this.player.direction !== direction) {
-				   this.player.playAnimation("walk", direction);
-				   if (this.pause) {
-					   this.player.animatedSprite.pause();
-				   }
-			   }
-		   };
-
-
 		   /**
 			* Called when a MOVE key is pressed.
 			*/
 		   RPGCore.prototype.movePlayerDir = function(direction) {
 			   if (this.player.state !== "walk" || this.player.direction !== direction) {
 				   this.player.playAnimation("walk", direction);
-				   if (this.pause) {
-					   this.player.animatedSprite.pause();
-				   }
 			   }
 		   };
 
