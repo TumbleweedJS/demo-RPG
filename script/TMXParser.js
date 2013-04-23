@@ -223,7 +223,7 @@ define(['require', './TW/Graphic/Layer', 'TW/Graphic/Sprite', 'TW/Collision/Coll
 			else if (objects[i].getElementsByTagName('polyline').length) {
 				console.warn('TMXParser: polyline are not supported; ignored.');
 			}
-			else if (objects[i].hasAttribute('gid').length) {
+			else if (objects[i].getAttribute('gid')) {
 				console.warn('TMXParser: tiles are not supported in objectgroup; ignored.');
 			} else {
 				var width = objects[i].getAttribute('width') || 20;

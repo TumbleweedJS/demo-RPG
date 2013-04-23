@@ -1,6 +1,8 @@
 
-define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 'TW/Event/KeyboardInput', './Player', './TMXParser', 'TW/Event/InputMapper'],
-	   function(Manager, Window, TrackingCamera, KeyboardInput, Player, TMXParser, InputMapper) {
+define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera',
+		'TW/Event/KeyboardInput', './Player', './TMXParser', 'TW/Event/InputMapper',
+	   'TW/Preload/XHRLoader'],
+	   function(Manager, Window, TrackingCamera, KeyboardInput, Player, TMXParser, InputMapper, XHRLoader) {
 
 		   function RPGCore() {
 			   this.totalElapsedTime = 0;
@@ -112,19 +114,13 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 
 		   RPGCore.prototype.loadMap = function(mapName) {
 			   this.file_name = mapName;
-			   this.parser = new TMXParser();
 
-			   if (this.file_name)
-			   {
-				   var request = new XMLHttpRequest();
-				   request.open("GET", this.file_name, false);
-				   //request.overrideMimeType('text/xml');
-				   request.send();
-				   var xml = request.responseXML;
-				   if (xml != null)
-				   {
-					   var tumbleweedLayer = this.parser.parseXML(xml);
-				   }
+			   var loader = new XHRLoader(mapName, "xml");
+			   loader.on('complete', function(_, xml) {
+				   
+				   this.parser = new TMXParser();
+				   var tumbleweedLayer = this.parser.parseXML(xml);
+				   
 				   this.window.addChild(tumbleweedLayer);
 				   if (this.parser.zIndexPlayer) {
 					   this.player.animatedSprite.zIndex = this.parser.zIndexPlayer;
@@ -133,11 +129,19 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera', 
 				   //console.log(this.player.rect);
 				   //tumbleweedLayer.addChild(this.player.rect);//
 				   this.listCollisionBox = this.parser.getCollisionList();
-			   }
-			   this.tumbleweedLayer = tumbleweedLayer;
-			   this.loadingScreen = new LoadingScreen(this);
-			   this.gameloop.addObject(this.loadingScreen);
-			   this.loaderInterval = window.setInterval(this.checkImageLoaded.bind(this), 30);
+			   
+				   this.tumbleweedLayer = tumbleweedLayer;
+				   this.loadingScreen = new LoadingScreen(this);
+				   this.gameloop.addObject(this.loadingScreen);
+				   this.loaderInterval = window.setInterval(this.checkImageLoaded.bind(this), 30);
+				   
+			   }.bind(this));
+
+			   loader.on('error', function(_, error) {
+				   //TODO 
+			   });
+
+			   loader.load();
 		   };
 
 		   RPGCore.prototype.checkImageLoaded = function() {
