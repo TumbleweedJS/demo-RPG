@@ -35,7 +35,7 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera',
 				   .bindEvent("MOVE_LEFT", "KEY_LEFT", this.keyboard)
 				   .bindEvent("MOVE_RIGHT", "KEY_D", this.keyboard)
 				   .bindEvent("MOVE_RIGHT", "KEY_RIGHT", this.keyboard)
-				   .bindEvent("SPRINT", "KEY_SHIFT", this.keyboard)
+				   .bindEvent("SPRINT", "KEY_SPACE", this.keyboard)
 				   .on("MOVE_UP", this.movePlayerDir.bind(this, "up"), KeyboardInput.isPressed)
 				   .on("MOVE_DOWN", this.movePlayerDir.bind(this, "down"), KeyboardInput.isPressed)
 				   .on("MOVE_LEFT", this.movePlayerDir.bind(this, "left"), KeyboardInput.isPressed)
@@ -45,12 +45,10 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera',
 				   .on("MOVE_LEFT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
 				   .on("MOVE_RIGHT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
 				   .on("SPRINT", this.startPlayerSprint.bind(this), KeyboardInput.isPressed)
-				   .on("SPRINT", this.stopPlayerSprint.bind(this), KeyboardInput.isReleased);			   
+				   .on("SPRINT", this.stopPlayerSprint.bind(this), KeyboardInput.isReleased);
 			   
 			   this.keyboard.on("KEY_M", this.muteUnmuteMusic.bind(this), KeyboardInput.isPressed);
 			   this.keyboard.on("KEY_P", this.pauseResume.bind(this), KeyboardInput.isPressed);
-
-
 		   }
 
 		   RPGCore.prototype.pauseResume = function() {
@@ -65,7 +63,7 @@ define(['./TW/Audio/Manager', 'TW/Graphic/Window', 'TW/Graphic/TrackingCamera',
 		   };
 
 		   RPGCore.prototype.muteUnmuteMusic = function() {
-			   this.audioManager.setMute(!this.audioManager.get(this.idSound1)._sounds[0].audio.muted);
+			   this.audioManager.setMute(!this.audioManager.get(this.idSound1)._sounds[0]._muted);
 		   };
 
 		   RPGCore.prototype.startPlayerSprint = function() {

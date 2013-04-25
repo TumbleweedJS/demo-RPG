@@ -86,11 +86,10 @@ define(['TW/GameLogic/Gameloop', 'TW/Event/KeyboardInput', './RPGCore'], functio
 	function launchGame() {
 		this.rpgCore.loadingScreen.loaded = true;
 		this.listener = startGame.bind(this);
-		this.rpgCore.keyboard.on("KEY_SPACE", this.listener, KeyboardInput.isPressed);
+		this.rpgCore.keyboard.once("KEY_SPACE", this.listener, KeyboardInput.isPressed);
 	}
 
 	function startGame() {
-		this.rpgCore.keyboard.off(this.listener);
 		this.rpgCore.playSound();
 		this.gameloop.rmObject(this.rpgCore.loadingScreen);
 		this.gameloop.addObject(this.rpgCore.window);	
