@@ -32,7 +32,9 @@ requirejs.config({
  *
  * @method __entry_point__
  */
-define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen'], function(Window, Loader, BootLoadingScreen) {
+define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameLogic/Gameloop',
+        'TW/GameLogic/GameStateStack', 'StartScreen', 'TW/Event/KeyboardInput'],
+       function(Window, Loader, BootLoadingScreen, Gameloop, GSS, StartScreen, KeyboardInput) {
 
 	// list of all global ressources to load.
 	var ressources = [
@@ -56,7 +58,22 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen'], function
 	 * @method startGame
 	 */
 	function startGame() {
-		console.log('start game');
+
+		var gl = new Gameloop();
+		var gss = new GSS(win.canvas);
+		gl.addObject(gss);
+
+		/* global objects shared between all states. */
+		var kb_input = new KeyboardInput();
+
+
+		/* add all GS */
+		gss.push(new StartScreen(kb_input));
+		//gss.push(new XXScreen());
+
+
+		gss.goToState('start');
+		gl.start();
 	}
 });
 
