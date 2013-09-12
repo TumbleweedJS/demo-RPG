@@ -36,7 +36,7 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen'], function
 
 	// list of all global ressources to load.
 	var ressources = [
-		"index.html"
+	    { src: "index.html", id: '1' }
 	];
 
 	var canvas = document.getElementById('mainCanvas');
