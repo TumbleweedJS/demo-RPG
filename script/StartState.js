@@ -46,6 +46,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 			var loader = this.getGameStateStack().shared.loader;
 			var logo_tumbleweed = loader.get("logo");
 			var background = loader.get("campagne");
+			context.shadowOffsetX = 4;
+			context.shadowOffsetY = 4;
+			context.shadowBlur = 5;
+			context.shadowColor = "black";
 			context.drawImage(background, 0, 0, background.width, background.height, 0, 0, context.canvas.width, context.canvas.height);
 			//Drawing the gray gradient square.
 			var gradient = context.createLinearGradient(0,0,0, context.canvas.height);

@@ -41,7 +41,9 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 	var ressources = [
 	    { src: "http://www.tumbleweed-studio.net/website/img/logo.png", id: 'logo', type: 'image'},
 	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/scene01.jpg", id: 'campagne', type: 'image'},
-	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/cave.jpg", id: "cave", type: 'image'}
+	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/cave.jpg", id: "cave", type: 'image'},
+	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/logo_fill.png", id: "logo_fill", type: 'image'},
+	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/logo_empty.png", id: "logo_empty", type: 'image'}
 	];
 
 	var canvas = document.getElementById('mainCanvas');

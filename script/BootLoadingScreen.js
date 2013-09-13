@@ -28,10 +28,14 @@ define([], function() {
 		var loadingValue = percent+"%";
 		
 		//Drawing the black background
+		context.shadowOffsetX = 4;
+		context.shadowOffsetY = 4;
+		context.shadowBlur = 5;
+		context.shadowColor = "black";
 		context.fillStyle = '#222222';
 		context.lineWidth = window.canvas.width / 40;
 		context.fillRect(0, 0, window.canvas.width, window.canvas.height);
-		//Drawing the gray gradient square.
+		//Drawing the grey gradient square.
 		var gradient = context.createLinearGradient(0,0,0, window.canvas.height);
 		gradient.addColorStop(0, "rgb(255,255,255)");
 		gradient.addColorStop(1, "rgb(0, 0, 0)");
@@ -51,6 +55,10 @@ define([], function() {
 		context.stroke();
 		//End of drawing the loading arc
 		//Drawing the loading text
+		context.shadowOffsetX = 4;
+		context.shadowOffsetY = 4;
+		context.shadowBlur = 5;
+		context.shadowColor = "black";
 		context.font = "20pt Calibri,Geneva,Arial";
 		context.fillStyle = "#FFFFFF";
 		context.textAlign = "center";
