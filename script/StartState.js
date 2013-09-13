@@ -11,12 +11,12 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 *
 	 * TODO: adding Touch event support
 	 *
-	 * @class StartScreen
+	 * @class StartState
 	 * @extends GameState
 	 * @constructor
 	 * @param {KeyBoardInput} kb_input
 	 */
-	function StartScreen(kb_input) {
+	function StartState(kb_input) {
 		GameState.call(this, {
 			name:   "start"
 		});
@@ -27,7 +27,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 		}.bind(this));
 	}
 
-	inherit(StartScreen, GameState);
+	inherit(StartState, GameState);
 
 	/**
 	 * Draw the start screen.
@@ -35,10 +35,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 * @method draw
 	 * @param context
 	 */
-	StartScreen.prototype.draw = function(context) {
+	StartState.prototype.draw = function(context) {
 		context.fillStyle = '#33FF33';
 		context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 	};
 
-	return StartScreen;
+	return StartState;
 });

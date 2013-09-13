@@ -5,18 +5,18 @@
 define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameState) {
 
 	/**
-	 * @class MapScreen
+	 * @class MapState
 	 * @extends GameState
 	 * @constructor
 	 * @param {KeyBoardInput} kb_input
 	 */
-	function MapScreen(kb_input) {
+	function MapState(kb_input) {
 		GameState.call(this, {
 			name:   "map"
 		});
 	}
 
-	inherit(MapScreen, GameState);
+	inherit(MapState, GameState);
 
 	/**
 	 * Draw the start screen.
@@ -24,10 +24,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 * @method draw
 	 * @param context
 	 */
-	MapScreen.prototype.draw = function(context) {
+	MapState.prototype.draw = function(context) {
 		context.fillStyle = '#FF33FF';
 		context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 	};
 
-	return MapScreen;
+	return MapState;
 });

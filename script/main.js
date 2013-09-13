@@ -33,9 +33,9 @@ requirejs.config({
  * @method __entry_point__
  */
 define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameLogic/Gameloop',
-        'TW/GameLogic/GameStateStack', 'TW/Event/KeyboardInput', 'StartScreen', 'MapLoadingScreen', 'MapScreen'],
+        'TW/GameLogic/GameStateStack', 'TW/Event/KeyboardInput', 'StartState', 'MapLoadingState', 'MapState'],
        function(Window, Loader, BootLoadingScreen, Gameloop, GSS, KeyboardInput,
-                StartScreen, MapLoadingScreen, MapScreen) {
+                StartState, MapLoadingState, MapState) {
 
 	// list of all global ressources to load.
 	var ressources = [
@@ -69,9 +69,9 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 
 		/* add all GS */
-		gss.push(new MapScreen(kb_input));
-		gss.push(new MapLoadingScreen(kb_input));
-		gss.push(new StartScreen(kb_input));
+		gss.push(new MapState(kb_input));
+		gss.push(new MapLoadingState(kb_input));
+		gss.push(new StartState(kb_input));
 
 		gl.start();
 	}
