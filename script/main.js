@@ -39,9 +39,9 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 	// list of all global ressources to load.
 	var ressources = [
-	    { src: "index.html", id: '1' },
-	    { src: "http://pc-infogame.com/images/images/rpg_maker1.png" },
-	    { src: "http://img2.brothergames.com/screenshots/softimage/0/001_action-rpg_maker-245945-1244603396.jpeg" }
+	    { src: "http://www.tumbleweed-studio.net/website/img/logo.png", id: 'logo', type: 'image'},
+	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/scene01.jpg", id: 'campagne', type: 'image'},
+	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/cave.jpg", id: "cave", type: 'image'}
 	];
 
 	var canvas = document.getElementById('mainCanvas');
@@ -64,6 +64,7 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 		var gl = new Gameloop();
 		var gss = new GSS(win.canvas);
+		window.loader = loader;
 		gl.addObject(gss);
 
 		/* global objects shared between all states. */

@@ -47,7 +47,6 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 	 */
 	MapLoadingScreen.prototype.startRessourceLoading = function(loader) {
 		loader.on('progress', function(_, percent) {
-			console.log('Ressources Loading: ' + percent + '%');
 		});
 
 		loader.on('complete', function() {
@@ -57,8 +56,11 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 
 
 	MapLoadingScreen.prototype.draw = function(context) {
-		context.fillStyle = '#FFFF00';
-		context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+			var loader = window.loader;
+			var logo_tumbleweed = loader.get("logo");
+			var background = loader.get("campagne");
+			context.drawImage(background, 0, 0, background.width, background.height, 0, 0, context.canvas.width, context.canvas.height);
+			context.drawImage(logo_tumbleweed, 0, 0, logo_tumbleweed.width, logo_tumbleweed.height, 50, 50, logo_tumbleweed.width, logo_tumbleweed.height);
 	};
 
 	return MapLoadingScreen;

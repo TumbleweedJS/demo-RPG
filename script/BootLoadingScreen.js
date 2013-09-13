@@ -27,10 +27,23 @@ define([], function() {
 		var trigonometricWise = true;
 		var loadingValue = percent+"%";
 		
-		//Drawing the loading arc
+		//Drawing the black background
 		context.fillStyle = '#222222';
 		context.lineWidth = window.canvas.width / 40;
 		context.fillRect(0, 0, window.canvas.width, window.canvas.height);
+		//Drawing the gray gradient square.
+		var gradient = context.createLinearGradient(0,0,0, window.canvas.height);
+		gradient.addColorStop(0, "rgb(255,255,255)");
+		gradient.addColorStop(1, "rgb(0, 0, 0)");
+		context.fillStyle = gradient;
+		context.fillRect(window.canvas.width / 7, window.canvas.height / 7, window.canvas.width - 2*(window.canvas.width / 7), window.canvas.height - 2*(window.canvas.height / 7));
+		//Drawing text "Loading main ressources"
+		context.font = "20pt Calibri, Geneva, Arial";
+		context.fillStyle = "#FFFFFF";
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		context.fillText("Loading main resources", window.canvas.width / 2, window.canvas.height / 7 + window.canvas.height / 10);
+		//Drawing the loading arc
 		context.strokeStyle = '#FFFFFF';
 		context.beginPath();
 		context.arc(x, y, radius, startAngle, endAngle, !trigonometricWise);
