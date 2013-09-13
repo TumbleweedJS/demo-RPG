@@ -39,7 +39,9 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 	// list of all global ressources to load.
 	var ressources = [
-	    { src: "index.html", id: '1' }
+	    { src: "index.html", id: '1' },
+	    { src: "http://pc-infogame.com/images/images/rpg_maker1.png" },
+	    { src: "http://img2.brothergames.com/screenshots/softimage/0/001_action-rpg_maker-245945-1244603396.jpeg" }
 	];
 
 	var canvas = document.getElementById('mainCanvas');

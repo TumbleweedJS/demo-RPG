@@ -23,7 +23,7 @@ define([], function() {
 		var y = window.canvas.height / 2.0;
 		var radius = window.canvas.width / 10;
 		var startAngle = 0;
-		var endAngle = x*2.0/100.0 * Math.PI;
+		var endAngle = percent*2.0/100.0 * Math.PI;
 		var trigonometricWise = true;
 		var loadingValue = percent+"%";
 		
@@ -33,8 +33,8 @@ define([], function() {
 		context.fillRect(0, 0, window.canvas.width, window.canvas.height);
 		context.strokeStyle = '#FFFFFF';
 		context.beginPath();
-		context.arc(x, y, radius, startAngle, endAngle, trigonometricWise);
-		context.closePath();
+		context.arc(x, y, radius, startAngle, endAngle, !trigonometricWise);
+		//context.closePath();
 		context.stroke();
 		//End of drawing the loading arc
 		//Drawing the loading text
