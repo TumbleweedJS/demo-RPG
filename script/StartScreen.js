@@ -1,3 +1,6 @@
+/**
+ * @module GameState
+ */
 
 define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameState) {
 
