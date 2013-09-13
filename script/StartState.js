@@ -14,20 +14,26 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 * @class StartState
 	 * @extends GameState
 	 * @constructor
-	 * @param {KeyBoardInput} kb_input
 	 */
-	function StartState(kb_input) {
+	function StartState() {
 		GameState.call(this, {
 			name:   "start"
 		});
 
-		//TODO: this code should be put out of this class.
-		kb_input.once('KEY_SPACE', function() {
-			this.getGameStateStack().pop();
-		}.bind(this));
+		//hack for enable XXState.prototype.onXXX()
+		delete this.onCreation;
+		delete this.onDelete;
 	}
 
 	inherit(StartState, GameState);
+
+
+	StartState.prototype.onCreation = function() {
+		var gss = this.getGameStateStack();
+		gss.shared.keyboard.once('KEY_SPACE', function() {
+			gss.pop();
+		}, function(_, is_pressed) { return !is_pressed; });
+	};
 
 	/**
 	 * Draw the start screen.
@@ -37,7 +43,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 */
 	StartState.prototype.draw = function(context) {
 			//Drawing campaign background
-			var loader = window.loader;
+			var loader = this.getGameStateStack().shared.loader;
 			var logo_tumbleweed = loader.get("logo");
 			var background = loader.get("campagne");
 			context.drawImage(background, 0, 0, background.width, background.height, 0, 0, context.canvas.width, context.canvas.height);

@@ -64,22 +64,32 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 		var gl = new Gameloop();
 		var gss = new GSS(win.canvas);
-		window.loader = loader;
 		gl.addObject(gss);
 
-		/* global objects shared between all states. */
-		var kb_input = new KeyboardInput();
+		// shared zone used to share resources.
+		gss.shared = {
+			keyboard:   new KeyboardInput(),
+			loader:     loader
+		};
 
 
 		/* add all GS */
-		gss.push(new MapState(kb_input));
-		var mapload = new MapLoadingState(kb_input);
-		gss.push(mapload);
-		var start = new StartState(kb_input);
+		var map_load = new MapLoadingState();
+		var map = new MapState();
+		var start = new StartState();
+
 		start.onDelete = function() {
-			mapload.loadMap('default.tmx');
+			map_load.path = 'default.tmx';
+			gss.push(map_load);
 		};
-		gss.push(start);
+
+		map_load.onDelete = function() {
+			//TODO: set map infos loaded from map_loader
+			console.log('--> go to map !');
+			gss.push(map);
+		};
+
+		gss.push(start);    // !!!
 
 		gl.start();
 	}

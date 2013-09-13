@@ -8,12 +8,15 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 * @class MapState
 	 * @extends GameState
 	 * @constructor
-	 * @param {KeyBoardInput} kb_input
 	 */
-	function MapState(kb_input) {
+	function MapState() {
 		GameState.call(this, {
 			name:   "map"
 		});
+
+		//hack for enable XXState.prototype.onXXX()
+		//delete this.onCreation;
+		//delete this.onDelete;
 	}
 
 	inherit(MapState, GameState);

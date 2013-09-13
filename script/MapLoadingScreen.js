@@ -17,11 +17,12 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 	 *  the screen invites the player to press the space key.
 	 *
 	 * @class MapLoadingScreen
+	 * @param {Loader} mainLoader global loader
 	 * @extends Layer
 	 * @constructor
 	 */
-	function MapLoadingScreen() {
-
+	function MapLoadingScreen(mainLoader) {
+		this.mainLoader = mainLoader;
 	}
 
 	inherit(MapLoadingScreen, Layer);
@@ -56,7 +57,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 
 
 	MapLoadingScreen.prototype.draw = function(context) {
-			var loader = window.loader;
+			var loader = this.mainLoader;
 			var logo_tumbleweed = loader.get("logo");
 			var background = loader.get("campagne");
 			context.drawImage(background, 0, 0, background.width, background.height, 0, 0, context.canvas.width, context.canvas.height);
