@@ -1,5 +1,5 @@
 
-define([], function() {
+define(['Map'], function(Map) {
 
 	/**
 	 * @class TMXParser
@@ -44,6 +44,14 @@ define([], function() {
 	};
 
 	/**
+	 * @method getMap
+	 * @return the new-created Map object.
+	 */
+	TMXParser.prototype.getMap = function() {
+		return this.map;
+	};
+
+	/**
 	 * Parse the <map> node element
 	 *
 	 * @method parseMap
@@ -51,7 +59,7 @@ define([], function() {
 	 */
 	TMXParser.prototype.parseMap = function(mapNode) {
 
-		this.map = {
+		var map = {
 			version:        parseInt(mapNode.getAttribute("version")) || 0,
 			tile_size: {
 				width:      parseInt(mapNode.getAttribute("tilewidth")) || 0,
@@ -68,13 +76,11 @@ define([], function() {
 
 
 		var tilesets = mapNode.getElementsByTagName("tileset");
-		this._parseTilesets(tilesets);
+		map.tilesets = this._parseTilesets(tilesets);
 		//this.createTileModelsFromTileSets(tilesets);
 
 
-		console.log(this.map);
-		console.log(this.tilesets);
-
+		this.map = new Map(map);
 
 		//////////////////////
 		//others child elements: layer, objectgroup, imagelayer
@@ -84,6 +90,7 @@ define([], function() {
 
 
 	TMXParser.prototype._parseTilesets = function(tilesets) {
+		var ret = [];
 		for (var i = 0; i < tilesets.length; i++) {
 
 			var tileset = {
@@ -114,8 +121,9 @@ define([], function() {
                });
 			}
 
-			this.tilesets.push(tileset);
+			ret.push(tileset);
 		}
+		return ret;
 	};
 
 
