@@ -70,8 +70,13 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 		/* add all GS */
 		gss.push(new MapState(kb_input));
-		gss.push(new MapLoadingState(kb_input));
-		gss.push(new StartState(kb_input));
+		var mapload = new MapLoadingState(kb_input);
+		gss.push(mapload);
+		var start = new StartState(kb_input);
+		start.onDelete = function() {
+			mapload.loadMap('default.tmx');
+		};
+		gss.push(start);
 
 		gl.start();
 	}
