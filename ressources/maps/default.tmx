@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE map SYSTEM "http://mapeditor.org/dtd/1.0/map.dtd">
 <map version="1.0" orientation="orthogonal" width="15" height="10" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="description" value="An old legend tell that this country is only a virtual world."/>
+  <property name="name" value="The Test Map"/>
+ </properties>
  <tileset firstgid="1" name="TerrainAtlas" tilewidth="32" tileheight="32">
   <image source="ressources/tilesets/world/terrain_atlas.png" width="1024" height="1024"/>
   <terraintypes>
