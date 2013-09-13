@@ -77,7 +77,7 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 		/* add all GS */
 		var map_load = new MapLoadingState();
-		var map = new MapState();
+		var map_state = new MapState();
 		var start = new StartState();
 
 		start.onDelete = function() {
@@ -86,9 +86,9 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 		};
 
 		map_load.onDelete = function() {
-			//TODO: set map infos loaded from map_loader
+			map_state.setMap(map_load.getMap());
 			console.log('--> go to map !');
-			gss.push(map);
+			gss.push(map_state);
 		};
 
 		gss.push(start);    // !!!

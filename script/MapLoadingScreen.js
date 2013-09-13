@@ -45,8 +45,11 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 	/**
 	 * @method startRessourceLoading
 	 * @param {Loader} loader
+	 * @param {Object} infos
+	 *  @param {String} [infos.name] Name of the map
+	 *  @param {String} [infos.description] Description of the map
 	 */
-	MapLoadingScreen.prototype.startRessourceLoading = function(loader) {
+	MapLoadingScreen.prototype.startRessourceLoading = function(loader, infos) {
 		loader.on('progress', function(_, percent) {
 			this.progress = percent;
 		}.bind(this));

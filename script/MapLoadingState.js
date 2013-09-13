@@ -23,12 +23,30 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 		 */
 		this.path = null;
 
+		/**
+		 * Map loaded
+		 *
+		 * @property {Map} map
+		 */
+		this.map = null;
+
 		//hack for enable XXState.prototype.onXXX()
 		delete this.onCreation;
 		delete this.onDelete;
 	}
 
 	inherit(MapLoadingState, GameState);
+
+
+   /**
+    * When the map is loaded, give access to them.
+    *
+    * @method getMap
+    * @return {Map} the loaded map. null if not yet loaded.
+    */
+	MapLoadingState.prototype.getMap = function() {
+		return this.map;
+	};
 
 	MapLoadingState.prototype.onCreation = function() {
 		this.screen = new MLScreen(this.getGameStateStack().shared.loader);
@@ -39,6 +57,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 	MapLoadingState.prototype.onDelete = function() {
 		this.removeLayer(this.screen);
 		this.screen = null;
+		this.map = null;
 	};
 
 
@@ -60,16 +79,23 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 		var loader = new XHRLoader('ressources/maps/' + this.path, "xml");
 		screen.startMapLoading(loader);
 
+		var that = this;
 		loader.on('complete', function(_, xml) {
 
 			var parser = new TMXParser(xml);
 			var ressources = parser.getListRessources();
+			that.map = parser.getMap();
 
 			var ress_loader = new Loader();
 			ress_loader.loadManyFiles(ressources);
-			screen.startRessourceLoading(ress_loader);
+			screen.startRessourceLoading(ress_loader, {
+				name: that.map.properties.name,
+				description: that.map.properties.description
+			});
 
 			ress_loader.on('complete', function() {
+				that.map.setResourceLoader(ress_loader);
+
 				gss.shared.keyboard.once('KEY_SPACE', function() {
 					gss.pop();
 				}, function(_, is_pressed) { return !is_pressed; });
