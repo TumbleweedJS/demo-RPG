@@ -24,6 +24,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 	function MapLoadingScreen(mainLoader) {
 		this.mainLoader = mainLoader;
 		this.progress = 0;
+		this.draw(document.getElementById("mainCanvas").getContext("2d"));
 	}
 
 	inherit(MapLoadingScreen, Layer);
