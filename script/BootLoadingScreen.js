@@ -12,12 +12,7 @@ define([], function() {
 	 */
 	function BootLoadingScreen(window, loader) {
 
-	    loader.on('start', function(_, x) {
-		console.log('start', x);
-			//
-		});
-
-	    loader.on('progress', function(_, percent) {
+		this.drawFunction = function(_, percent) {
 		var context = window.canvas.getContext('2d');
 		var x = window.canvas.width / 2.0;
 		var y = window.canvas.height / 2.0;
@@ -65,7 +60,15 @@ define([], function() {
 		context.textBaseline = "middle";
 		context.fillText(loadingValue, x, y);
 		//End of drawing the loading text
-	    });
+		}
+
+		this.drawFunction({}, 0.0);
+
+	    loader.on('start', function(_, x) {
+			//
+		});
+
+	    loader.on('progress', this.drawFunction);
 
 		loader.on('error', function(_, error) {
 			if (console && console.error) {
