@@ -23,6 +23,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 	 */
 	function MapLoadingScreen(mainLoader) {
 		this.mainLoader = mainLoader;
+		this.progress = 0;
 	}
 
 	inherit(MapLoadingScreen, Layer);
@@ -34,7 +35,6 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 	 */
 	MapLoadingScreen.prototype.startMapLoading = function(loader) {
 		loader.on('progress', function(_, percent) {
-			this.progress = 0;
 		});
 
 		loader.on('complete', function() {
