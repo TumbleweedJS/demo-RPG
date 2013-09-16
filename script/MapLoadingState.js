@@ -97,7 +97,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 				that.map.setResourceLoader(ress_loader);
 
 				gss.shared.keyboard.once('KEY_SPACE', function() {
-					gss.pop();
+					gss.pop(400);
 				}, function(_, is_pressed) { return !is_pressed; });
 			});
 

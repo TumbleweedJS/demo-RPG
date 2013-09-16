@@ -31,7 +31,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	StartState.prototype.onCreation = function() {
 		var gss = this.getGameStateStack();
 		gss.shared.keyboard.once('KEY_SPACE', function() {
-			gss.pop();
+			gss.pop(400);
 		}, function(_, is_pressed) { return !is_pressed; });
 	};
 

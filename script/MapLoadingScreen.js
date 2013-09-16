@@ -24,7 +24,6 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 	function MapLoadingScreen(mainLoader) {
 		this.mainLoader = mainLoader;
 		this.progress = 0;
-		this.draw(document.getElementById("mainCanvas").getContext("2d"));
 	}
 
 	inherit(MapLoadingScreen, Layer);
@@ -83,7 +82,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 			//drawing empty logo
 			context.drawImage(logo_empty, 0, 0, logo_empty.width, logo_empty.height, context.canvas.width / 18, context.canvas.height / 7, logo_empty.width / 1.5, logo_empty.height / 1.5);
 			//drawing filled logo (progressing during time)
-			context.drawImage(logo_fill, 0, 0, logo_fill.width, logo_fill.height, context.canvas.width / 18, context.canvas.height / 7, logo_fill.width / 1.5, logo_fill.height * (this.progress / 100.0) / 1.5);
+			context.drawImage(logo_fill, 0, 0, logo_fill.width, logo_fill.height, context.canvas.width / 18, context.canvas.height / 7, logo_fill.width / 1.5, logo_fill.height  * (this.progress / 100.0) / 1.5);
 			//drawing loading percent.
 			context.font = "Bold 35px Calibri,Geneva,Arial";
 			context.fillStyle = "rgb(60,144,193)";

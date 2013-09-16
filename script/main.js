@@ -33,8 +33,8 @@ requirejs.config({
  * @method __entry_point__
  */
 define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameLogic/Gameloop',
-        'TW/GameLogic/GameStateStack', 'TW/Event/KeyboardInput', 'StartState', 'MapLoadingState', 'MapState'],
-       function(Window, Loader, BootLoadingScreen, Gameloop, GSS, KeyboardInput,
+        'Game', 'TW/Event/KeyboardInput', 'StartState', 'MapLoadingState', 'MapState'],
+       function(Window, Loader, BootLoadingScreen, Gameloop, Game, KeyboardInput,
                 StartState, MapLoadingState, MapState) {
 
 	// list of all global ressources to load.
@@ -64,9 +64,7 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 	 */
 	function startGame() {
 
-		var gl = new Gameloop();
-		var gss = new GSS(win.canvas);
-		gl.addObject(gss);
+		var gss = new Game(win.canvas);
 
 		// shared zone used to share resources.
 		gss.shared = {
@@ -82,18 +80,18 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 		start.onDelete = function() {
 			map_load.path = 'default.tmx';
-			gss.push(map_load);
+			gss.push(map_load, 400);
 		};
 
 		map_load.onDelete = function() {
 			map_state.setMap(map_load.getMap());
 			console.log('--> go to map !');
-			gss.push(map_state);
+			gss.push(map_state, 400);
 		};
 
-		gss.push(start);    // !!!
+		gss.push(start, 300);    // !!!
 
-		gl.start();
+		gss.start();
 	}
 });
 
