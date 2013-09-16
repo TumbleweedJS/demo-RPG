@@ -74,17 +74,28 @@ define(['Map'], function(Map) {
 			properties:     this._parseProperties(mapNode)
 		};
 
-
-		var tilesets = mapNode.getElementsByTagName("tileset");
-		map.tilesets = this._parseTilesets(tilesets);
-		//this.createTileModelsFromTileSets(tilesets);
-
-
 		this.map = new Map(map);
 
-		//////////////////////
-		//others child elements: layer, objectgroup, imagelayer
+		var tilesets = mapNode.getElementsByTagName("tileset");
+		this.map.setTilesets(this._parseTilesets(tilesets));
 
+
+		for (var i = 0; i < mapNode.childNodes.length; i++) {
+			var layer = mapNode.childNodes[i];
+
+			switch (layer.tagName) {
+				case 'layer':
+					var data = this._parseLayer(layer);
+					this.map.addLayer(data);
+					break;
+				case 'objectgroup':
+				case 'imagelayer':
+				default:
+					if (layer.tagName !== undefined && layer.tagName !== "properties" && layer.tagName !== "tileset") {
+						console.log("[TMXParser] unknow Layer type: " + layer.tagName);
+					}
+			}
+		}
 	};
 
 
@@ -108,11 +119,16 @@ define(['Map'], function(Map) {
 
 			var image = tilesets[i].getElementsByTagName("image")[0];
 			tileset.image = {
+				id:         'tileset #' + (i + 1),
 				source:     image.getAttribute("source"),
 				width:      parseInt(image.getAttribute("width")) || null,
 				height:     parseInt(image.getAttribute("height")) || null
 			};
-			this._ressources.push(tileset.image.source);
+			this._ressources.push({
+				src:    tileset.image.source,
+				id:     tileset.image.id,
+				type:   'image'
+			});
 
 			var tiles = tilesets[i].getElementsByTagName("tile");
 			for (var j = 0; j < tiles.length; j++) {
@@ -127,53 +143,32 @@ define(['Map'], function(Map) {
 	};
 
 
-	TMXParser.prototype.getTileModelFromGID = function(gid) {
-		for (var i = 0; i < this.tilesets.length && gid > this.tilesets[i].first_gid; i++);
-		i--;
+	TMXParser.prototype._parseLayer = function(layer) {
+		var data = {
+			type: 'layer',
+			opacity:    parseFloat(layer.getAttribute('opacity')) || 0,
+			width:    parseFloat(layer.getAttribute('width')) || 0,
+			height:    parseFloat(layer.getAttribute('height')) || 0,
+			visible:    !!(parseInt(layer.getAttribute('visible')) || 1),
+			name:       layer.getAttribute('name'),
+			properties: this._parseProperties(layer),
+			tiles:      []
+		};
 
-		if (i === -1) {
-			return null;
-		}
-
-		var tileset = this.tilesets[i];
-		var id = gid - tileset.first_gid;
-		var tile;
-
-		if (tileset.tiles[id] !== undefined && tileset.tiles[id].id === id) {
-			tile = tileset.tiles[id];
-		} else {
-			for (i = 0; i < tileset.tiles.length; i++) {
-				if (tileset.tiles[i].id === id) {
-					tile = tileset.tiles[i];
-				}
+		var tiles = layer.getElementsByTagName('tile');
+		for (var i = 0; i < tiles.length; i++) {
+			var gid = parseInt(tiles[i].getAttribute('gid')) || 0;
+			if (gid !== 0) {
+				data.tiles.push({
+					x:      i % data.width,
+					y:      Math.floor(i / data.width),
+					gid:    gid
+                });
 			}
-			return null;
 		}
 
-
-		/*
-			TODO: code copied from the old branch.
-			Must be refactorized.
-		 */
-		x_max = (tileset.image.width - tileset.margin) / (tileset.spacing + tileset.tile_size.width);
-
-		var x = i % x_max;
-		var y = i / x_max;
-
-		//coordonée dans l'image du Tile
-		total_offsetx = tileset.margin + (x * (tileset.spacing + tileset.tile_size.width));
-		total_offsety = tileset.margin + (y * (tileset.spacing + tileset.tile_size.height));
-
-		return {
-             gid:       gid,
-             image:     null,
-             width:     tileset.tile_size.width,
-             height:    tileset.tile_size.height,
-             x_tex:     total_offsetx,
-             y_tex:     total_offsety
-         };
+		return data;
 	};
-
 
 
 	/**
