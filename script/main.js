@@ -43,7 +43,9 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 	    { src: "ressources/backgrounds/scene01.jpg", id: 'campagne', type: 'image'},
 	    { src: "ressources/backgrounds/cave.jpg", id: "cave", type: 'image'},
 	    { src: "ressources/images/logo_fill.png", id: "logo_fill", type: 'image'},
-	    { src: "ressources/images/logo_empty.png", id: "logo_empty", type: 'image'}
+	    { src: "ressources/images/logo_empty.png", id: "logo_empty", type: 'image'},
+	    { src: "ressources/spritesheets/player.json", id: "spritesheet-player", type: 'json'},
+	    { src: "ressources/charsets/TerraSheet.png", id: "image-player", type: 'image'}
 	];
 
 	var canvas = document.getElementById('mainCanvas');
@@ -79,6 +81,9 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 		var start = new StartState();
 
 		start.onDelete = function() {
+
+			gss.createPlayer();
+
 			map_load.path = 'default.tmx';
 			gss.push(map_load, 400);
 		};

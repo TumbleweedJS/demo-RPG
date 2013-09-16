@@ -1,6 +1,6 @@
 
 define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloop',
-       'TW/Event/KeyboardInput'], function(inherit, GSS, Gameloop, KeyboardInput) {
+       'TW/Event/KeyboardInput', 'Player'], function(inherit, GSS, Gameloop, KeyboardInput, Player) {
 
 	/**
 	 * Main controller, this class is the global GameStateStack.
@@ -38,6 +38,15 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 
 		this.gl.start();
 	};
+
+
+	Game.prototype.createPlayer = function() {
+		this.player = new Player(this.shared.loader);
+	};
+
+
+
+
 
 	/**
 	 * @method pop

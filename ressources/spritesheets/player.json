@@ -1,0 +1,47 @@
+{
+"default" : {
+"w" : 32,
+"h" : 32,
+"framerate": 10
+},
+"stand_up" : {
+"frames" : [{"x":32, "y":96}]
+},
+"stand_left" : {
+"frames" : [{"x":32, "y":32}]
+},
+"stand_down" : {
+"frames" : [{"x":32, "y":0}]
+},
+"stand_right" : {
+"frames" : [{"x":32, "y":64}]
+},
+"walk_up" : {
+"frames" : [{"x":0, "y":96}, {"x":32, "y":96}, {"x":64, "y":96}]
+},
+"run_up" : {
+"framerate" : 30,
+"frames" : [{"x":0, "y":96}, {"x":32, "y":96}, {"x":64, "y":96}]
+},
+"walk_left" : {
+"frames" : [{"x":0, "y":32}, {"x":32, "y":32}, {"x":64, "y":32}]
+},
+"run_left" : {
+"framerate" : 30,
+"frames" : [{"x":0, "y":32}, {"x":32, "y":32}, {"x":64, "y":32}]
+},
+"walk_down" : {
+"frames" : [{"x":0, "y":0}, {"x":32, "y":0}, {"x":64, "y":0}]
+},
+"run_down" : {
+"framerate" : 30,
+"frames" : [{"x":0, "y":0}, {"x":32, "y":0}, {"x":64, "y":0}]
+},
+"walk_right" : {
+"frames" : [{"x":0, "y":64}, {"x":32, "y":64}, {"x":64, "y":64}]
+},
+"run_right" : {
+"framerate" : 30,
+"frames" : [{"x":0, "y":64}, {"x":32, "y":64}, {"x":64, "y":64}]
+}
+}

@@ -2,7 +2,7 @@
  * @module GameState
  */
 
-define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameState) {
+define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen'], function(inherit, GameState, MapScreen) {
 
 	/**
 	 * @class MapState
@@ -29,9 +29,11 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	inherit(MapState, GameState);
 
 	MapState.prototype.onCreation = function() {
-		if (!this.fadeInID) {
-		var context = document.getElementById("mainCanvas").getContext("2d");
+		if (this.screen) {
+			this.removeLayer(this.screen);
 		}
+		this.screen = new MapScreen(this.map, this.getGameStateStack().player);
+		this.addLayer(this.screen);
 	};
 
 	/**
@@ -42,24 +44,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 */
 	MapState.prototype.setMap = function(map) {
 		this.map = map;
-	};
-
-	/**
-	 * Draw the start screen.
-	 *
-	 * @method draw
-	 * @param context
-	 */
-	MapState.prototype.draw = function(context) {
-
-		context.save();
-		context.fillStyle = '#FF33FF';
-		context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-
-
-
-		context.restore();
-
 	};
 
 	return MapState;
