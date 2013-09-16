@@ -39,11 +39,11 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 	// list of all global ressources to load.
 	var ressources = [
-	    { src: "http://www.tumbleweed-studio.net/website/img/logo.png", id: 'logo', type: 'image'},
-	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/scene01.jpg", id: 'campagne', type: 'image'},
-	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/cave.jpg", id: "cave", type: 'image'},
-	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/logo_fill.png", id: "logo_fill", type: 'image'},
-	    { src: "http://www.tumbleweed-studio.net/~bonnet_b/images/logo_empty.png", id: "logo_empty", type: 'image'}
+	    { src: "ressources/images/logo.png", id: 'logo', type: 'image'},
+	    { src: "ressources/backgrounds/scene01.jpg", id: 'campagne', type: 'image'},
+	    { src: "ressources/backgrounds/cave.jpg", id: "cave", type: 'image'},
+	    { src: "ressources/images/logo_fill.png", id: "logo_fill", type: 'image'},
+	    { src: "ressources/images/logo_empty.png", id: "logo_empty", type: 'image'}
 	];
 
 	var canvas = document.getElementById('mainCanvas');
