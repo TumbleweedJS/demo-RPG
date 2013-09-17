@@ -1,7 +1,6 @@
 /**
  * @module GameState
  */
-
 define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/KeyboardInput', 'TW/Event/InputMapper',
        'TW/Graphic/TrackingCamera'],
        function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, TrackingCamera) {
@@ -27,9 +26,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		delete this.onCreation;
 		//delete this.onDelete;
 
-
-
-		this.totalElapsedTime = 0;
 	}
 
 	inherit(MapState, GameState);
@@ -81,8 +77,8 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			.on("MOVE_DOWN", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
 			.on("MOVE_LEFT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
 			.on("MOVE_RIGHT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
-			.on("SPRINT", this.startPlayerSprint.bind(this), KeyboardInput.isPressed)
-			.on("SPRINT", this.stopPlayerSprint.bind(this), KeyboardInput.isReleased);
+			.on("SPRINT", this.player.startRunning.bind(this.player), KeyboardInput.isPressed)
+			.on("SPRINT", this.player.stopRunning.bind(this.player), KeyboardInput.isReleased);
 
 		//this.keyboard.on("KEY_M", this.muteUnmuteMusic.bind(this), KeyboardInput.isPressed);
 		//this.keyboard.on("KEY_P", this.pauseResume.bind(this), KeyboardInput.isPressed);
@@ -110,61 +106,48 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 
 
-       MapState.prototype.movePlayerDir = function(direction) {
-	       if (this.player.state !== "walk" || this.player.direction !== direction) {
-		       this.player.playAnimation("walk", direction);
-	       }
-       };
+	MapState.prototype.movePlayerDir = function(direction) {
+	   if (this.player.state !== "walk" || this.player.direction !== direction) {
+	       this.player.playAnimation("walk", direction);
+	   }
+	};
+
+	MapState.prototype.update = function(delta) {
+		this.player.update(delta);
+
+		if (this.pause === true) {
+		   return;
+		}
+
+		var direction = '';
+		var undo = '';
+
+		if (this.mapper.get("MOVE_UP")) {
+		   direction = 'up';
+		   undo = 'down';
+		}
+		if (this.mapper.get("MOVE_DOWN")) {
+		   direction = 'down';
+		   undo = 'up';
+		}
+		if (this.mapper.get("MOVE_LEFT")) {
+		   direction = (direction !== '' ? direction + '-left' : 'left');
+		   undo = (undo !== '' ? undo + '-right' : 'right');
+		}
+		if (this.mapper.get("MOVE_RIGHT")) {
+		   direction = (direction !== '' ? direction + '-right' : 'right');
+		   undo = (undo !== '' ? undo + '-left' : 'left');
+		}
+
+		if (direction !== '') {
+		   this.player.move(delta, direction);
+		   if (this.isPlayerCollidingAnObstacle()) {
+		       this.player.move(delta, undo);
+		   }
+		}
+	};
 
 
-       MapState.prototype.getSpeed = function() {
-	       if (this.player.sprint === true) {
-		       return 4;
-	       } else {
-		       return 2;
-	       }
-       };
-
-       MapState.prototype.update = function(delta) {
-	       this.player.update(delta);
-
-	       if (this.pause === true) {
-		       return;
-	       }
-
-	       if ((this.totalElapsedTime + delta) > (1000 / 50)) {
-		       if (this.mapper.get("MOVE_UP")) {
-			       this.player.moveUp(this.getSpeed());
-			       if (this.isPlayerCollidingAnObstacle()) {
-				       this.player.moveDown(this.getSpeed());
-			       }
-		       }
-		       if (this.mapper.get("MOVE_LEFT")) {
-			       this.player.moveLeft(this.getSpeed());
-			       if (this.isPlayerCollidingAnObstacle()) {
-				       this.player.moveRight(this.getSpeed());
-			       }
-		       }
-		       if (this.mapper.get("MOVE_DOWN")) {
-			       this.player.moveDown(this.getSpeed());
-			       if (this.isPlayerCollidingAnObstacle()) {
-				       this.player.moveUp(this.getSpeed());
-			       }
-		       }
-		       if (this.mapper.get("MOVE_RIGHT")) {
-			       this.player.moveRight(this.getSpeed());
-			       if (this.isPlayerCollidingAnObstacle()) {
-				       this.player.moveLeft(this.getSpeed());
-			       }
-		       }
-
-//		       this.checkTriggerZone();
-
-		       this.totalElapsedTime = 0;
-	       } else {
-		       this.totalElapsedTime += delta;
-	       }
-       };
 
        MapState.prototype.isPlayerCollidingAnObstacle = function() {
 	       var length = this.listCollisionBox.length;
@@ -187,17 +170,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		       return true;
 	       }
 	       return false;
-       };
-
-
-       MapState.prototype.startPlayerSprint = function() {
-	       this.player.sprint = true;
-	       this.player.startRunning();
-       };
-
-       MapState.prototype.stopPlayerSprint = function() {
-	       this.player.sprint = false;
-	       this.player.stopRunning();
        };
 
 
@@ -227,7 +199,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	       }
        };
 
-       MapState.prototype.stopMovingDir = function(event) {
+       MapState.prototype.stopMovingDir = function() {
 	       this.deduceAnimation();
        };
 

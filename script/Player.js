@@ -36,6 +36,15 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 		this.sprint = false;
 
 		/**
+		 * Speed of the player (in case per second)
+		 * @property {{walk: number, run: number}} speed
+		 */
+		this.speed = {
+			walk:   2,
+			run:   4
+		};
+
+		/**
 		 * Collision associated to the player
 		 * @type {CollisionBox}
 		 */
@@ -75,12 +84,14 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 
 
 	Player.prototype.startRunning = function() {
+		this.sprint = true;
 	   if (this.state === "walk") {
 	       this.playAnimation("run");
 	   }
 	};
 
 	Player.prototype.stopRunning = function() {
+		this.sprint = false;
 	   if (this.state === "run") {
 	       this.playAnimation("walk");
 	   }
@@ -111,12 +122,61 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 	};
 
 	Player.prototype.moveDown = function(speed) {
+		this.move(speed, 'down');
 		this.moveCoord(0, speed / 32);
 	};
 
 	Player.prototype.moveRight = function(speed) {
 		this.moveCoord(speed / 32, 0);
 	};
+
+
+	/**
+	 * Tell to the player to move during `delta` miliseconds,
+	 * in the direction `direction`.
+	 *
+	 * His walk and run speed are used for the distance.
+	 *
+     * @method move
+	 * @param {Number} delta elapsed time, in milisecond
+	 * @param {String} direction should be one of the four direction: "up", "down", "left" and "right".
+	 *  It's also possible to set a diagonal direction, separated by a hyphen ( "up-left" )
+     */
+	Player.prototype.move = function(delta, direction) {
+		//speed, in case per second
+		var speed = this.sprint ? this.speed.run : this.speed.walk;
+
+		var multi_dir = direction.split('-');
+		if (multi_dir.length === 2) {
+			//delta /= Math.sqrt(2)
+			delta /= 1.4142;
+			this.move(delta, multi_dir[0]);
+			direction = multi_dir[1];
+		}
+
+		var dist = (delta / 1000) * speed;
+
+
+		switch(direction) {
+			case 'up':
+				this.moveCoord(0, - dist);
+				break;
+			case 'left':
+				this.moveCoord(- dist, 0);
+				break;
+			case 'down':
+				this.moveCoord(0, dist);
+				break;
+			case 'right':
+				this.moveCoord(dist, 0);
+				break;
+			default:
+				throw new Error('[Player]: invalid direction');
+		}
+
+
+	};
+
 
 	/**
 	 * Move the player.
@@ -129,7 +189,8 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 	 * @param {Number} y y coordinate (in tile)
 	 */
 	Player.prototype.moveCoord = function(x, y) {
-		this.setCoord(this.coord_map.x + x, this.coord_map.y + y);	};
+		this.setCoord(this.coord_map.x + x, this.coord_map.y + y);
+	};
 
 	/**
 	 * set the coord in the map referenciel
