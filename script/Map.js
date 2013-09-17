@@ -25,6 +25,8 @@ define([], function() {
 		this._loader = null;
 
 		this.layers = [];
+
+		this.refs = {};
 	}
 
 	/**

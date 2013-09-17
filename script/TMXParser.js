@@ -128,16 +128,16 @@ define(['Map'], function(Map) {
 				height:     parseInt(image.getAttribute("height")) || null
 			};
 			this._ressources.push({
-				src:    tileset.image.source,
-				id:     tileset.image.id,
-				type:   'image'
-			});
+				                      src:    tileset.image.source,
+				                      id:     tileset.image.id,
+				                      type:   'image'
+			                      });
 
 			var tiles = tilesets[i].getElementsByTagName("tile");
 			for (var j = 0; j < tiles.length; j++) {
 				tileset.tiles.push({
-					id:     parseInt(tiles[j].getAttribute("id")) || 0
-               });
+					                   id:     parseInt(tiles[j].getAttribute("id")) || 0
+				                   });
 			}
 
 			ret.push(tileset);
@@ -148,27 +148,36 @@ define(['Map'], function(Map) {
 	TMXParser.prototype._parseGroupObject = function(layer) {
 		var data = {
 			type: 'objectgroup',
+			opacity:    parseFloat(layer.getAttribute('opacity')) || 0,
 			width:    parseFloat(layer.getAttribute('width')) || 0,
 			height:    parseFloat(layer.getAttribute('height')) || 0,
+			visible:    !!(parseInt(layer.getAttribute('visible')) || 1),
 			name:       layer.getAttribute('name'),
 			properties: this._parseProperties(layer),
-			collisionBoxes: []
+			objects: {}
 		};
 
-		var x;
-		var y;
-		var w;
-		var h;
 		var objects = layer.getElementsByTagName('object');
 		for (var i = 0; i < objects.length; i++) {
-			x = parseInt(objects[i].getAttribute('x'));
-			y = parseInt(objects[i].getAttribute('y'));
-			w = parseInt(objects[i].getAttribute('width'));
-			h = parseInt(objects[i].getAttribute('height'));
-			data.collisionBoxes.push({x:x, y:y, w:w, h:h});
+			var obj = {
+				name:       objects[i].getAttribute('name'),
+				type:       objects[i].getAttribute('type'),
+				x:          parseFloat(objects[i].getAttribute('x')),
+				y:          parseFloat(objects[i].getAttribute('y')),
+				width:      parseFloat(objects[i].getAttribute('width')) || 0,
+				height:     parseFloat(objects[i].getAttribute('height')) || 0,
+				gid:        parseInt(objects[i].getAttribute('gid')) || 0,
+				visible:    !!(parseInt(objects[i].getAttribute('visible')) || 1),
+				properties: this._parseProperties(objects[i])
+			};
+
+			if (data.objects[obj.type] === undefined) {
+				data.objects[obj.type] = [];
+			}
+			data.objects[obj.type].push(obj);
 		}
 
-		return data;	
+		return data;
 	};
 
 
@@ -189,10 +198,10 @@ define(['Map'], function(Map) {
 			var gid = parseInt(tiles[i].getAttribute('gid')) || 0;
 			if (gid !== 0) {
 				data.tiles.push({
-					x:      i % data.width,
-					y:      Math.floor(i / data.width),
-					gid:    gid
-                });
+					                x:      i % data.width,
+					                y:      Math.floor(i / data.width),
+					                gid:    gid
+				                });
 			}
 		}
 

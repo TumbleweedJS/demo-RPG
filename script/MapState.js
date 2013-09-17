@@ -32,10 +32,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 	MapState.prototype._loadCollisionBoxesFromMap = function() {
 		for (var i = 0; i < this.map.layers.length; i++) {
-			if (this.map.layers[i].type === "objectgroup") {
-				for (var j = 0; j < this.map.layers[i].collisionBoxes.length; j++) {
-					var tmp = this.map.layers[i].collisionBoxes[j];
-					this.listCollisionBox.push(new TW.Collision.CollisionBox(tmp.x, tmp.y, tmp.w, tmp.h))
+			if (this.map.layers[i].objects !== undefined && this.map.layers[i].objects.collision !== undefined) {
+				for (var j = 0; j < this.map.layers[i].objects.collision.length; j++) {
+					var tmp = this.map.layers[i].objects.collision[j];
+					this.listCollisionBox.push(new TW.Collision.CollisionBox(tmp.x, tmp.y, tmp.width, tmp.height));
 				}
 			}
 		}
@@ -45,6 +45,23 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	MapState.prototype.onCreation = function() {
 		var player = this.getGameStateStack().player;
 		this.player = player;
+
+
+		var list_spawn = [];
+		for (var i = 0; i < this.map.layers.length; i++) {
+			if (this.map.layers[i].objects !== undefined && this.map.layers[i].objects.spawn !== undefined) {
+				for (var j = 0; j < this.map.layers[i].objects.spawn.length; j++) {
+					this.map.layers[i].objects.spawn[j].zIndex = i;
+				}
+				list_spawn = list_spawn.concat(this.map.layers[i].objects.spawn);
+			}
+		}
+		console.log(list_spawn);
+
+
+		player.setCoord(list_spawn[0].x / 32, list_spawn[0].y / 32);
+		player.setAttr({ zIndex: list_spawn[0].zIndex });
+		console.log(player.zIndex);
 
 		if (this.screen) {
 			this.removeLayer(this.screen);

@@ -11,11 +11,6 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(i
 
 		this._createSpriteMap();
 
-		/*
-		 TODO: trouver le placeholder !
-		 */
-
-		player.setAttr({ zIndex: 9999});
 		this.addChild(player);
 	}
 
