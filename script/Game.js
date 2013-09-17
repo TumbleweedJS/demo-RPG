@@ -24,6 +24,12 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 		 * @property {Object} transition
 		 */
 		this.transition = null;
+
+		/**
+		 *
+		 * @property {KeyboardInput} keyboard
+		 */
+		this.keyboard = null;
 	}
 
 	inherit(Game, GSS);
