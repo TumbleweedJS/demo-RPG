@@ -28,6 +28,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 			map:    null
 		};
 
+
 		/**
 		 * Is the player running ?
 		 * @property {Boolean} sprint
@@ -39,7 +40,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 		 * @type {CollisionBox}
 		 */
 		this.collisionBox = new CollisionBox(10, 16, 12, 16);
-
+		this.setCoord(5,5);
 		/**
 		 * Orientation of the player.
 		 *

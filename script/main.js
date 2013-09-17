@@ -84,7 +84,7 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 			gss.createPlayer();
 
-			map_load.path = 'default.tmx';
+			map_load.path = 'map.xml';
 			gss.push(map_load, 400);
 		};
 

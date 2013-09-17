@@ -89,6 +89,9 @@ define(['Map'], function(Map) {
 					this.map.addLayer(data);
 					break;
 				case 'objectgroup':
+					var data = this._parseGroupObject(layer);
+					this.map.addLayer(data);
+					break;
 				case 'imagelayer':
 				default:
 					if (layer.tagName !== undefined && layer.tagName !== "properties" && layer.tagName !== "tileset") {
@@ -140,6 +143,32 @@ define(['Map'], function(Map) {
 			ret.push(tileset);
 		}
 		return ret;
+	};
+
+	TMXParser.prototype._parseGroupObject = function(layer) {
+		var data = {
+			type: 'objectgroup',
+			width:    parseFloat(layer.getAttribute('width')) || 0,
+			height:    parseFloat(layer.getAttribute('height')) || 0,
+			name:       layer.getAttribute('name'),
+			properties: this._parseProperties(layer),
+			collisionBoxes: []
+		};
+
+		var x;
+		var y;
+		var w;
+		var h;
+		var objects = layer.getElementsByTagName('object');
+		for (var i = 0; i < objects.length; i++) {
+			x = parseInt(objects[i].getAttribute('x'));
+			y = parseInt(objects[i].getAttribute('y'));
+			w = parseInt(objects[i].getAttribute('width'));
+			h = parseInt(objects[i].getAttribute('height'));
+			data.collisionBoxes.push({x:x, y:y, w:w, h:h});
+		}
+
+		return data;	
 	};
 
 

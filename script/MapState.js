@@ -34,6 +34,18 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 	inherit(MapState, GameState);
 
+	MapState.prototype._loadCollisionBoxesFromMap = function() {
+		for (var i = 0; i < this.map.layers.length; i++) {
+			if (this.map.layers[i].type === "objectgroup") {
+				for (var j = 0; j < this.map.layers[i].collisionBoxes.length; j++) {
+					var tmp = this.map.layers[i].collisionBoxes[j];
+					this.listCollisionBox.push(new TW.Collision.CollisionBox(tmp.x, tmp.y, tmp.w, tmp.h))
+				}
+			}
+		}
+	};
+
+
 	MapState.prototype.onCreation = function() {
 		var player = this.getGameStateStack().player;
 		this.player = player;
@@ -48,6 +60,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 		this.listCollisionBox = [];
 
+		this._loadCollisionBoxesFromMap();
 
 		this.mapper = new InputMapper();
 		this.mapper.allowMultiInput = true;
@@ -82,8 +95,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			x:  100,
 			y: 100
 		};
-
-
 	};
 
 
@@ -163,7 +174,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		       }
 	       }
 
-	       if (this.player.collisionBox.x + this.player.collisionBox.width > this.screen.width) {
+	       if (this.player.collisionBox.x + this.player.collisionBox.width > this.map.width) {
 		       return true;
 	       }
 	       if (this.player.collisionBox.x < 0) {
@@ -172,7 +183,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	       if (this.player.collisionBox.y < 0) {
 		       return true;
 	       }
-	       if (this.player.collisionBox.y + this.player.collisionBox.height > this.screen.height) {
+	       if (this.player.collisionBox.y + this.player.collisionBox.height > this.map.height) {
 		       return true;
 	       }
 	       return false;

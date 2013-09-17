@@ -3,8 +3,8 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(i
 
 	function MapScreen(map, player) {
 		Layer.call(this, {
-			width:      map.map_size.width * map.tile_size.width,
-			height:     map.map_size.height * map.tile_size.height
+			width:      document.getElementById("mainCanvas").width,
+			height:     document.getElementById("mainCanvas").height
 		});
 		this.map = map;
 
@@ -32,7 +32,9 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(i
 				zIndex:     i
 			});
 
-
+			if (!layers[i].tiles) {
+				continue;
+			}
 			for (var j = 0; j < layers[i].tiles.length; j++) {
 				var infos = layers[i].tiles[j];
 				var tile_model = map.getTileModelFromGID(infos.gid);

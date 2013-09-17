@@ -19,6 +19,7 @@ define([], function() {
 		this.map_size = data.map_size;
 		this.properties = data.properties;
 
+
 		this.tilesets = null;
 
 		this._loader = null;
