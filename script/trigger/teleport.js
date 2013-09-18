@@ -1,7 +1,12 @@
 define([], function() {
 	return {
 		onEnter: function(state, properties) {
-			state.player.setCoord(parseInt(properties.x), parseInt(properties.y));
+
+			if (properties.map !== undefined) {
+				state.getGameStateStack().goToMap(properties.map, properties.spawn);
+			} else {
+				state.player.setCoord(parseInt(properties.x), parseInt(properties.y));
+			}
 		}
 	};
 });

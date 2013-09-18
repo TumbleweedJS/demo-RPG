@@ -11981,6 +11981,7 @@
  </layer>
  <objectgroup name="Player" width="55" height="60">
   <object name="start-spawn" type="spawn" x="224" y="96" width="32" height="32"/>
+  <object name="entry_tent" type="spawn" x="1136" y="193" width="34" height="29"/>
  </objectgroup>
  <layer name="UpperLayer1" width="55" height="60">
   <data>
@@ -18621,11 +18622,11 @@
   <object type="collision" x="1088" y="96" width="128" height="64"/>
   <object type="collision" x="1088" y="160" width="44" height="32"/>
   <object type="collision" x="1171" y="160" width="45" height="32"/>
-  <object name="teleport" type="zone" x="1132" y="160" width="39" height="22">
+  <object name="teleport" type="zone" x="1132" y="160" width="42" height="18">
    <properties>
+    <property name="map" value="inside_tent.tmx"/>
     <property name="source" value="teleport"/>
-    <property name="x" value="32"/>
-    <property name="y" value="33"/>
+    <property name="spawn" value="start"/>
    </properties>
   </object>
   <object type="collision" x="480" y="256" width="896" height="32"/>

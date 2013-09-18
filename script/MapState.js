@@ -43,6 +43,8 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		 */
 		this._refs = {};
 
+		this.mapper = null;
+
 		//hack for enable XXState.prototype.onXXX()
 		delete this.onCreation;
 		delete this.onDelete;
@@ -63,7 +65,8 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		var player = this.getGameStateStack().player;
 		this.player = player;
 
-
+		this._objects = {};
+		this._refs = {};
 		// process the this.map attribute for create all objects in memory.
 		this._initObjects();
 
@@ -79,6 +82,9 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		// Controle Keyboard
 		var keyboard = this.getGameStateStack().keyboard;
 
+		if (this.mapper !== null) {
+			this.mapper.removeAll();
+		}
 		this.mapper = new InputMapper();
 		this.mapper.allowMultiInput = true;
 		this.mapper.bindEvent("MOVE_UP", "KEY_W", keyboard)
@@ -120,10 +126,11 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	};
 
 	MapState.prototype.onDelete = function() {
-		console.log("map delete");
+/*		console.log("map delete");
 		this._objects = {};
 		this._refs = {};
 		this.mapper.removeAll();
+		*/
 	};
 
 
