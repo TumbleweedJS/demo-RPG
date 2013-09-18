@@ -11980,7 +11980,7 @@
   </data>
  </layer>
  <objectgroup name="Player" width="55" height="60">
-  <object name="start" type="spawn" x="224" y="96" width="32" height="32"/>
+  <object name="start-spawn" type="spawn" x="224" y="96" width="32" height="32"/>
  </objectgroup>
  <layer name="UpperLayer1" width="55" height="60">
   <data>

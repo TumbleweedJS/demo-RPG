@@ -45,7 +45,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 		//hack for enable XXState.prototype.onXXX()
 		delete this.onCreation;
-		//delete this.onDelete;
+		delete this.onDelete;
 
 	}
 
@@ -66,14 +66,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 		// process the this.map attribute for create all objects in memory.
 		this._initObjects();
-
-
-		// set the player spanw point
-		//TODO: should be done by the `Game` class ?
-		var first_spawn = this._objects.spawn[0];
-		player.setCoord(first_spawn.x / 32, first_spawn.y / 32);
-		player.setAttr({ zIndex: first_spawn.zIndex });
-
 
 
 		// Create the new screen and let it ccreate all drawable objects.
@@ -109,6 +101,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			.on("SPRINT", this.player.startRunning.bind(this.player), KeyboardInput.isPressed)
 			.on("SPRINT", this.player.stopRunning.bind(this.player), KeyboardInput.isReleased);
 
+
+		//keyboard.once('KEY_G', function() {
+		//	this.getGameStateStack().goToMap('map2.tmx', 'spawn-2');
+		//}.bind(this));
 		//this.keyboard.on("KEY_M", this.muteUnmuteMusic.bind(this), KeyboardInput.isPressed);
 		//this.keyboard.on("KEY_P", this.pauseResume.bind(this), KeyboardInput.isPressed);
 
@@ -121,6 +117,13 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			x:  100,
 			y: 100
 		};
+	};
+
+	MapState.prototype.onDelete = function() {
+		console.log("map delete");
+		this._objects = {};
+		this._refs = {};
+		this.mapper.removeAll();
 	};
 
 
@@ -175,6 +178,18 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	MapState.prototype.setMap = function(map) {
 		this.map = map;
 	};
+
+	/**
+	 * get a named object by its name.
+	 *
+	 * @method getRefs
+	 * @param {String} ref name of the object
+	 * @return the object itself. null if not exist.
+     */
+	MapState.prototype.getRefs = function(ref) {
+		return this._refs[ref] || null;
+	};
+
 
 	/**
 	 * initialize all objects present in layers.

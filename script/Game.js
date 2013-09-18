@@ -30,6 +30,11 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 		 * @property {KeyboardInput} keyboard
 		 */
 		this.keyboard = null;
+
+
+		this.map_load = null;
+		this.map_state = null;
+		this.start_state = null;
 	}
 
 	inherit(Game, GSS);
@@ -50,11 +55,47 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 		this.player = new Player(this.shared.loader);
 	};
 
+	/**
+	 * move to another map.
+	 *
+	 * @method goToMap
+	 * @param {String} map TMX map file.
+	 * @param {Object|String} target spawn point of the player.
+	 *  If it's a String, this should be the name of a `spown` object on the map.
+	 *  As an object, it must contain `x`, `y` and `zIndex` element.
+	 *  @param target.x x coordinate (in tile)
+	 *  @param target.y y coordinate (in tile)
+	 *  @param target.zIndex
+	 */
+	Game.prototype.goToMap = function(map, target) {
+		this.map_load.path = map;
 
+		var that = this;
+		this.map_load.onDelete = function() {
+			that.map_state.setMap(this.getMap());
+			that.push(that.map_state, 400);
+
+			if (target instanceof Object) {
+				that.player.setCoord(target.x, target.y, target.zIndex);
+			} else {
+				var spawn = that.map_state.getRefs(target);
+				if (spawn === null || spawn.type !== 'spawn') {
+					throw new Error('[Game] Bad spawn point on map ' + this.path);
+				}
+				that.player.setCoord(spawn.x / 32, spawn.y / 32, spawn.zIndex);
+			}
+		};
+
+		//TODO: remove the old map_state if any.
+//		this.pop(400);
+		this.push(this.map_load, 400);
+	};
 
 
 
 	/**
+	 * Override of `pop` method, adding possibility to use graphic transitions.
+	 *
 	 * @method pop
 	 * @param {Number} [delay] fade out delay (in milliseconds)
 	 */
@@ -79,6 +120,13 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 		}
 	};
 
+	/**
+	 * Override of `push` method, adding possibility to use graphic transitions.
+	 *
+	 * @method push
+	 * @param {GameState} [state] state to set active.
+	 * @param {Number} [delay] fade out delay (in milliseconds)
+	 */
 	Game.prototype.push = function(state, delay) {
 		GSS.prototype.push.call(this, state);
 

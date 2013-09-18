@@ -113,6 +113,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 
 
 
+	//TODO: method exists for compatibility with old code. should be deleted.
 	Player.prototype.moveUp = function(speed) {
 		this.moveCoord(0, -speed / 32);
 	};
@@ -198,16 +199,25 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 	 * @method setCoord
 	 * @param {Number} x x coordinate (in tile)
 	 * @param {Number} y y coordinate (in tile)
+	 * @param {Number} [zIndex] change the zIndex
 	 */
-	Player.prototype.setCoord = function(x, y) {
+	Player.prototype.setCoord = function(x, y, zIndex) {
 		this.coord_map.x = x;
 		this.coord_map.y = y;
 		this.collisionBox.x = 10 + x * this.width;
 		this.collisionBox.y = 16 + y * this.height;
 		this.setAttr({
-			x:  x * this.width,
-			y:  y * this.height
+			x:          x * this.width,
+			y:          y * this.height,
+			zIndex:     zIndex === undefined ? this.zIndex : zIndex
         });
+
+		//dirty hack,
+		//because the zIndex is not dynamic. (yes, it's a bug)
+		if (zIndex !== undefined && this.parent !== null) {
+			this.parent.rmChild(this);
+			this.parent.addChild(this);
+		}
 	};
 
 	return Player;

@@ -76,25 +76,16 @@ define(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/GameL
 
 
 		/* add all GS */
-		var map_load = new MapLoadingState();
-		var map_state = new MapState();
-		var start = new StartState();
+		gss.map_load = new MapLoadingState();
+		gss.map_state = new MapState();
+		gss.start_state = new StartState();
 
-		start.onDelete = function() {
-
+		gss.start_state.onDelete = function() {
 			gss.createPlayer();
-
-			map_load.path = 'map.xml';
-			gss.push(map_load, 400);
+			gss.goToMap('default.tmx', 'start-spawn');
 		};
 
-		map_load.onDelete = function() {
-			map_state.setMap(map_load.getMap());
-			console.log('--> go to map !');
-			gss.push(map_state, 400);
-		};
-
-		gss.push(start, 300);    // !!!
+		gss.push(gss.start_state, 300);    // !!!
 
 		gss.start();
 	}
