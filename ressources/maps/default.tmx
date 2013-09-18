@@ -18604,6 +18604,7 @@
   <object type="collision" x="337" y="140" width="31" height="38"/>
   <object name="teleport" type="zone" x="192" y="0" width="96" height="24">
    <properties>
+    <property name="source" value="teleport"/>
     <property name="x" value="51"/>
     <property name="y" value="8,5"/>
    </properties>
@@ -18611,6 +18612,7 @@
   <object type="collision" x="1714" y="-23" width="67" height="382"/>
   <object name="teleport" type="zone" x="1632" y="304" width="32" height="32">
    <properties>
+    <property name="source" value="teleport"/>
     <property name="x" value="7"/>
     <property name="y" value="1"/>
    </properties>
@@ -18621,6 +18623,7 @@
   <object type="collision" x="1171" y="160" width="45" height="32"/>
   <object name="teleport" type="zone" x="1132" y="160" width="39" height="22">
    <properties>
+    <property name="source" value="teleport"/>
     <property name="x" value="32"/>
     <property name="y" value="33"/>
    </properties>
@@ -18644,6 +18647,7 @@
   <object type="collision" x="1312" y="800" width="32" height="320"/>
   <object name="teleport" type="zone" x="1024" y="1104" width="64" height="32">
    <properties>
+    <property name="source" value="teleport"/>
     <property name="x" value="35.5"/>
     <property name="y" value="6"/>
    </properties>

@@ -166,6 +166,34 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			if (this.isPlayerCollidingAnObstacle()) {
 				this.player.move(delta, undo);
 			}
+
+			this._checkTriggerZone();
+		}
+	};
+
+
+	/**
+	 * Check if the player activate a zone trigger.
+	 *
+	 * @method _checkTriggerZone
+	 * @private
+     */
+	MapState.prototype._checkTriggerZone = function() {
+		var length = this._objects.zone === undefined ? 0 : this._objects.zone.length;
+		for (var i = 0; i < length; i++) {
+			var zone = this._objects.zone[i];
+			if (zone.box.isCollidingBox(this.player.collisionBox) !== zone.isInZone) {
+				if (zone.isInZone) {
+					if (zone.trigger.onLeave) {
+						zone.trigger.onLeave(this, zone.properties);
+					}
+				} else {
+					if (zone.trigger.onEnter) {
+						zone.trigger.onEnter(this, zone.properties);
+					}
+				}
+				zone.isInZone = !zone.isInZone;
+			}
 		}
 	};
 
@@ -217,6 +245,20 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 							break;
 						case 'collision':
 							obj = new CollisionBox(info.x, info.y, info.width, info.height);
+							break;
+						case 'zone':
+							var box = new CollisionBox(info.x, info.y, info.width, info.height);
+							obj = {
+								box:        box,
+								trigger:    null,
+								isInZone:   false,
+								properties: info.properties
+							};
+							require(['trigger/' + info.properties.source], function(obj) {
+								return function(trigger) {
+									obj.trigger = trigger;
+								}
+							}(obj));
 							break;
 						default:
 							console.log('MAP: unknow object type: ' + info.type);
