@@ -149,12 +149,12 @@ define(['Map'], function(Map) {
 		var data = {
 			type: 'objectgroup',
 			opacity:    parseFloat(layer.getAttribute('opacity')) || 0,
-			width:    parseFloat(layer.getAttribute('width')) || 0,
-			height:    parseFloat(layer.getAttribute('height')) || 0,
+			width:      parseFloat(layer.getAttribute('width')) || 0,
+			height:     parseFloat(layer.getAttribute('height')) || 0,
 			visible:    !!(parseInt(layer.getAttribute('visible')) || 1),
 			name:       layer.getAttribute('name'),
 			properties: this._parseProperties(layer),
-			objects: {}
+			objects:    []
 		};
 
 		var objects = layer.getElementsByTagName('object');
@@ -170,11 +170,7 @@ define(['Map'], function(Map) {
 				visible:    !!(parseInt(objects[i].getAttribute('visible')) || 1),
 				properties: this._parseProperties(objects[i])
 			};
-
-			if (data.objects[obj.type] === undefined) {
-				data.objects[obj.type] = [];
-			}
-			data.objects[obj.type].push(obj);
+			data.objects.push(obj);
 		}
 
 		return data;

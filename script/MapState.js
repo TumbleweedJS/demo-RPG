@@ -2,8 +2,8 @@
  * @module GameState
  */
 define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/KeyboardInput', 'TW/Event/InputMapper',
-       'TW/Graphic/TrackingCamera'],
-       function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, TrackingCamera) {
+       'TW/Graphic/TrackingCamera', 'TW/Collision/CollisionBox'],
+       function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, TrackingCamera, CollisionBox) {
 
 	/**
 	 * @class MapState
@@ -14,13 +14,34 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		GameState.call(this, {
 			name:   "map"
 		});
-		this.startToDraw = false;
-		this.opacity = 0.0;
-		this.status = "fadeIN";
-		/**mainCanvas
+
+		/**
+		 * TMX map parsed.
+		 * It's the model in the MVC pattern.
+		 *
 		 * @property {Map} map
 		 */
 		this.map = null;
+
+		/**
+		 * List of all objects which are not purely graphic.
+		 *
+		 * Each type of objects have it own entry in the attribute.
+		 *
+		 * @property {Object} _objects
+		 */
+		this._objects = {};
+
+		/**
+		 * Contain reference to all objects with a name.
+		 *
+		 * They are accessed with the following syntax:
+		 * `this._refs.my_object_Name`
+		 *
+		 * @property {Object} _refs
+		 * @private
+		 */
+		this._refs = {};
 
 		//hack for enable XXState.prototype.onXXX()
 		delete this.onCreation;
@@ -30,50 +51,41 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 	inherit(MapState, GameState);
 
-	MapState.prototype._loadCollisionBoxesFromMap = function() {
-		for (var i = 0; i < this.map.layers.length; i++) {
-			if (this.map.layers[i].objects !== undefined && this.map.layers[i].objects.collision !== undefined) {
-				for (var j = 0; j < this.map.layers[i].objects.collision.length; j++) {
-					var tmp = this.map.layers[i].objects.collision[j];
-					this.listCollisionBox.push(new TW.Collision.CollisionBox(tmp.x, tmp.y, tmp.width, tmp.height));
-				}
-			}
-		}
-	};
 
-
+	/**
+	 * Creation of the map, and all its objects.
+	 *
+	 * `this.map` is already defined and the player can be get from the `Game` class.
+	 *
+	 * @method onCreation
+	 */
 	MapState.prototype.onCreation = function() {
 		var player = this.getGameStateStack().player;
 		this.player = player;
 
 
-		var list_spawn = [];
-		for (var i = 0; i < this.map.layers.length; i++) {
-			if (this.map.layers[i].objects !== undefined && this.map.layers[i].objects.spawn !== undefined) {
-				for (var j = 0; j < this.map.layers[i].objects.spawn.length; j++) {
-					this.map.layers[i].objects.spawn[j].zIndex = i;
-				}
-				list_spawn = list_spawn.concat(this.map.layers[i].objects.spawn);
-			}
-		}
-		console.log(list_spawn);
+		// process the this.map attribute for create all objects in memory.
+		this._initObjects();
 
 
-		player.setCoord(list_spawn[0].x / 32, list_spawn[0].y / 32);
-		player.setAttr({ zIndex: list_spawn[0].zIndex });
-		console.log(player.zIndex);
+		// set the player spanw point
+		//TODO: should be done by the `Game` class ?
+		var first_spawn = this._objects.spawn[0];
+		player.setCoord(first_spawn.x / 32, first_spawn.y / 32);
+		player.setAttr({ zIndex: first_spawn.zIndex });
 
+
+
+		// Create the new screen and let it ccreate all drawable objects.
 		if (this.screen) {
 			this.removeLayer(this.screen);
 		}
 		this.screen = new MapScreen(this.map, player);
 		this.addLayer(this.screen);
 
+
+		// Controle Keyboard
 		var keyboard = this.getGameStateStack().keyboard;
-
-		this.listCollisionBox = [];
-
-		this._loadCollisionBoxesFromMap();
 
 		this.mapper = new InputMapper();
 		this.mapper.allowMultiInput = true;
@@ -102,7 +114,8 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 
 
-
+		// Tracking Camera: make the camera follow the player.
+		// TODO: this should be done in the view (MapScreen)
 		this.screen.camera = new TrackingCamera(player);
 		this.screen.camera.margin = {
 			x:  100,
@@ -112,16 +125,105 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 
 	/**
+	 * @method update
+	 * @param {Number} delta elapsed time (in miliseconds)
+	 */
+	MapState.prototype.update = function(delta) {
+		this.player.update(delta);
+
+		if (this.pause === true) {
+			return;
+		}
+
+
+		/* player movement */
+
+		var direction = '';
+		var undo = '';
+
+		if (this.mapper.get("MOVE_UP")) {
+			direction = 'up';
+			undo = 'down';
+		}
+		if (this.mapper.get("MOVE_DOWN")) {
+			direction = 'down';
+			undo = 'up';
+		}
+		if (this.mapper.get("MOVE_LEFT")) {
+			direction = (direction !== '' ? direction + '-left' : 'left');
+			undo = (undo !== '' ? undo + '-right' : 'right');
+		}
+		if (this.mapper.get("MOVE_RIGHT")) {
+			direction = (direction !== '' ? direction + '-right' : 'right');
+			undo = (undo !== '' ? undo + '-left' : 'left');
+		}
+
+		if (direction !== '') {
+			this.player.move(delta, direction);
+			if (this.isPlayerCollidingAnObstacle()) {
+				this.player.move(delta, undo);
+			}
+		}
+	};
+
+	/**
 	 * set and initialize a new map.
 	 *
 	 * @method setMap
 	 * @param {Map} map
-	 */
+	*/
 	MapState.prototype.setMap = function(map) {
 		this.map = map;
 	};
 
+	/**
+	 * initialize all objects present in layers.
+	 *
+	 * @method _initObjects
+	 * @private
+	 */
+	MapState.prototype._initObjects = function() {
+		for (var i = 0; i < this.map.layers.length; i++) {
+			var layer = this.map.layers[i];
 
+			if (layer.objects !== undefined) {
+				for (var j = 0; j < layer.objects.length; j++) {
+					var info = layer.objects[j];
+					var obj = null;
+
+					switch (info.type) {
+						case 'spawn':
+							obj = {
+								type:   'spawn',
+								x:          info.x,
+								y:          info.y,
+								zIndex:     i
+							};
+							break;
+						case 'collision':
+							obj = new CollisionBox(info.x, info.y, info.width, info.height);
+							break;
+						default:
+							console.log('MAP: unknow object type: ' + info.type);
+					}
+					if (obj !== null) {
+						if (this._objects[info.type] === undefined) {
+							this._objects[info.type] = [];
+						}
+						this._objects[info.type].push(obj);
+
+						if (info.name !== null) {
+							this._refs[info.name] = obj;
+						}
+					}
+				}
+			}
+		}
+	};
+
+
+
+	/* Old code, should be cleaned */
 
 	MapState.prototype.movePlayerDir = function(direction) {
 	   if (this.player.state !== "walk" || this.player.direction !== direction) {
@@ -129,47 +231,13 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	   }
 	};
 
-	MapState.prototype.update = function(delta) {
-		this.player.update(delta);
-
-		if (this.pause === true) {
-		   return;
-		}
-
-		var direction = '';
-		var undo = '';
-
-		if (this.mapper.get("MOVE_UP")) {
-		   direction = 'up';
-		   undo = 'down';
-		}
-		if (this.mapper.get("MOVE_DOWN")) {
-		   direction = 'down';
-		   undo = 'up';
-		}
-		if (this.mapper.get("MOVE_LEFT")) {
-		   direction = (direction !== '' ? direction + '-left' : 'left');
-		   undo = (undo !== '' ? undo + '-right' : 'right');
-		}
-		if (this.mapper.get("MOVE_RIGHT")) {
-		   direction = (direction !== '' ? direction + '-right' : 'right');
-		   undo = (undo !== '' ? undo + '-left' : 'left');
-		}
-
-		if (direction !== '') {
-		   this.player.move(delta, direction);
-		   if (this.isPlayerCollidingAnObstacle()) {
-		       this.player.move(delta, undo);
-		   }
-		}
-	};
 
 
 
        MapState.prototype.isPlayerCollidingAnObstacle = function() {
-	       var length = this.listCollisionBox.length;
-	       for (i = 0; i < length; i++) {
-		       if (this.listCollisionBox[i].isCollidingBox(this.player.collisionBox)) {
+	       var length = this._objects['collision'].length;
+	       for (var i = 0; i < length; i++) {
+		       if (this._objects['collision'][i].isCollidingBox(this.player.collisionBox)) {
 			       return true;
 		       }
 	       }
