@@ -267,6 +267,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 								}
 							}(obj));
 							break;
+						case: 'NPC':
+							obj = new NPC();
+							map.getLayerZIndex(i).add(obj);
+						break;
 						default:
 							console.log('MAP: unknow object type: ' + info.type);
 					}
