@@ -1,6 +1,6 @@
 
 define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloop',
-       'TW/Event/KeyboardInput', 'Player'], function(inherit, GSS, Gameloop, KeyboardInput, Player) {
+		'TW/Event/KeyboardInput', 'Player', 'TW/Audio/AudioInstance'], function(inherit, GSS, Gameloop, KeyboardInput, Player, AudioInstance) {
 
 	/**
 	 * Main controller, this class is the global GameStateStack.
@@ -46,6 +46,13 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 		/* access devices */
 		this.keyboard = new KeyboardInput();
 
+		var sound = new AudioInstance(this.shared.loader.get('main-music'));
+		sound.play();
+		this.keyboard.on('KEY_M', function(_, isPressed) {
+			if (isPressed) {
+				sound.mute(!sound.isMuted());
+			}
+		});
 
 		this.gl.start();
 	};
