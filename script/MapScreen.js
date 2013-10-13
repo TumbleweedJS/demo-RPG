@@ -8,6 +8,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(i
 		});
 		this.map = map;
 
+		this.saveLayers = [];
 
 		this._createSpriteMap();
 
@@ -15,6 +16,25 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(i
 	}
 
 	inherit(MapScreen, Layer);
+
+	/**
+	*	Retrieve the Layer which have the specified zIndex.
+	*
+	*	@method getLayerZIndex
+	*	@param {Integer} zIndex
+	*/
+	MapScreen.prototype.getLayerZIndex = function(valZIndex) {
+		for (var i = 0; i < this.saveLayers.length; i++) {
+			if (valZIndex === this.saveLayers[i].zIndex) {
+				return this.saveLayers[i];
+			}
+		}
+		if (this.saveLayers.length > 0)
+			return this.saveLayers[0];
+		else
+			return null;
+	};
+
 
 	MapScreen.prototype._createSpriteMap = function() {
 		var layers = this.map.layers;
@@ -26,6 +46,9 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(i
 				height:     map.map_size.height * map.tile_size.height,
 				zIndex:     i
 			});
+
+			this.addChild(layer);
+			this.saveLayers.push(layer);
 
 			if (!layers[i].tiles) {
 				continue;
@@ -47,7 +70,6 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(i
 					}
 				}));
 			}
-			this.addChild(layer);
 		}
 	};
 /*

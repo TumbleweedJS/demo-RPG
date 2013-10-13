@@ -2,8 +2,8 @@
  * @module GameState
  */
 define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/KeyboardInput', 'TW/Event/InputMapper',
-       'TW/Graphic/TrackingCamera', 'TW/Collision/CollisionBox'],
-       function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, TrackingCamera, CollisionBox) {
+       'TW/Graphic/TrackingCamera', 'TW/Collision/CollisionBox', 'NPC'],
+       function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, TrackingCamera, CollisionBox, NPC) {
 
 	/**
 	 * @class MapState
@@ -67,9 +67,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 		this._objects = {};
 		this._refs = {};
-		// process the this.map attribute for create all objects in memory.
-		this._initObjects();
-
 
 		// Create the new screen and let it ccreate all drawable objects.
 		if (this.screen) {
@@ -77,6 +74,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		}
 		this.screen = new MapScreen(this.map, player);
 		this.addLayer(this.screen);
+
+
+		// process the this.map attribute for create all objects in memory.
+		this._initObjects();
 
 
 		// Controle Keyboard
@@ -139,6 +140,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	 * @param {Number} delta elapsed time (in miliseconds)
 	 */
 	MapState.prototype.update = function(delta) {
+		GameState.prototype.update.call(this, delta);
 		this.player.update(delta);
 
 		if (this.pause === true) {
@@ -267,9 +269,9 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 								}
 							}(obj));
 							break;
-						case: 'NPC':
-							obj = new NPC();
-							map.getLayerZIndex(i).add(obj);
+						case 'NPC':
+							obj = new NPC({x: info.x, y: info.y, width: info.width, height: info.height, mode: "FILLED"});
+							this.screen.getLayerZIndex(i).addChild(obj);
 						break;
 						default:
 							console.log('MAP: unknow object type: ' + info.type);

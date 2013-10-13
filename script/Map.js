@@ -39,24 +39,6 @@ define([], function() {
 		this._loader = loader;
 	};
 
-	/**
-	*	Retrieve the Layer which have the specified zIndex.
-	*
-	*	@method getLayerZIndex
-	*	@param {Integer} zIndex
-	*/
-	Map.prototype.getLayerZIndex = function(valZIndex) {
-		for (var i = 0; i < this.layers.length; i++) {
-			if (valZIndex === this.layers[i].zIndex) {
-				return this.layers[i];
-			}
-		}
-		if (this.layers.length > 0)
-			return this.layers[0];
-		else
-			return null;
-	};
-
 	Map.prototype.setTilesets = function(tilesets) {
 		this.tilesets = tilesets;
 	};
