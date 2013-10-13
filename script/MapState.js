@@ -47,7 +47,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 		//hack for enable XXState.prototype.onXXX()
 		delete this.onCreation;
-		delete this.onDelete;
+		//delete this.onDelete;
+
+
+        this.on('creation', this._onCreation.bind(this));
 
 	}
 
@@ -59,16 +62,16 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	 *
 	 * `this.map` is already defined and the player can be get from the `Game` class.
 	 *
-	 * @method onCreation
+	 * @method _onCreation
 	 */
-	MapState.prototype.onCreation = function() {
+	MapState.prototype._onCreation = function() {
 		var player = this.getGameStateStack().player;
 		this.player = player;
 
 		this._objects = {};
 		this._refs = {};
 
-		// Create the new screen and let it ccreate all drawable objects.
+		// Create the new screen and let it create all drawable objects.
 		if (this.screen) {
 			this.removeLayer(this.screen);
 		}
@@ -124,14 +127,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			x:  100,
 			y: 100
 		};
-	};
-
-	MapState.prototype.onDelete = function() {
-/*		console.log("map delete");
-		this._objects = {};
-		this._refs = {};
-		this.mapper.removeAll();
-		*/
 	};
 
 

@@ -81,10 +81,10 @@ require(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/Game
 		gss.map_state = new MapState();
 		gss.start_state = new StartState();
 
-		gss.start_state.onDelete = function() {
+		gss.start_state.on('delete', function() {
 			gss.createPlayer();
 			gss.goToMap('default.tmx', 'start-spawn');
-		};
+		});
 
 		gss.push(gss.start_state, 300);    // !!!
 

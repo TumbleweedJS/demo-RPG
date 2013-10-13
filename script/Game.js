@@ -44,7 +44,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 		this.gl.addObject(this);
 
 		/* access devices */
-		this.keyboard = new KeyboardInput();
+		this.keyboard = this.shared.keyboard;
 
 		var sound = new AudioInstance(this.shared.loader.get('main-music'));
 		sound.play();
@@ -70,16 +70,16 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 	 * @param {Object|String} target spawn point of the player.
 	 *  If it's a String, this should be the name of a `spown` object on the map.
 	 *  As an object, it must contain `x`, `y` and `zIndex` element.
-	 *  @param target.x x coordinate (in tile)
-	 *  @param target.y y coordinate (in tile)
-	 *  @param target.zIndex
+	 *  @param {Number} target.x x coordinate (in tile)
+	 *  @param {Number} target.y y coordinate (in tile)
+	 *  @param {Number} target.zIndex
 	 */
 	Game.prototype.goToMap = function(map, target) {
 		this.map_load.path = map;
 
 		var that = this;
-		this.map_load.onDelete = function() {
-			that.map_state.setMap(this.getMap());
+        this.map_load.once('delete', function() {
+			that.map_state.setMap(that.map_load.getMap());
 			that.push(that.map_state, 400);
 
 			if (target instanceof Object) {
@@ -91,9 +91,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloo
 				}
 				that.player.setCoord(spawn.x / 32, spawn.y / 32, spawn.zIndex);
 			}
-		};
+		});
 
 		//TODO: remove the old map_state if any.
+
 //		this.pop(400);
 		this.push(this.map_load, 400);
 	};

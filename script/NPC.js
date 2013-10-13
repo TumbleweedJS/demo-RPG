@@ -28,6 +28,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/
 		};
 
 		NPC.prototype.update = function(elapsedTime) {
+			console.log('u');
 			if (this.updateCalls) {
 				this.updateCalls++;
 				if (this.updateCalls > 30) {

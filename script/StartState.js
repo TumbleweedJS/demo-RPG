@@ -20,20 +20,27 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 			name:   "start"
 		});
 
-		//hack for enable XXState.prototype.onXXX()
-		delete this.onCreation;
-		delete this.onDelete;
+        var state = this;
+        this.on('creation', function() { return init(state); });
 	}
 
 	inherit(StartState, GameState);
 
+    /**
+     * Initialize the screen.
+     *
+     * Listen the SPACE event on keyboard. Called during the `creation` event.
+     * @method init
+     * @param {StartState} state state to initialize. (equivalent of `this`)
+     * @private
+     */
+    function init(state) {
+        var gss = state.getGameStateStack();
+        gss.shared.keyboard.once('KEY_SPACE', function() {
+            gss.pop(400);
+        }, function(_, is_pressed) { return !is_pressed; });
+    }
 
-	StartState.prototype.onCreation = function() {
-		var gss = this.getGameStateStack();
-		gss.shared.keyboard.once('KEY_SPACE', function() {
-			gss.pop(400);
-		}, function(_, is_pressed) { return !is_pressed; });
-	};
 
 	/**
 	 * Draw the start screen.

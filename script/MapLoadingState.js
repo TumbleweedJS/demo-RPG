@@ -30,9 +30,19 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 		 */
 		this.map = null;
 
-		//hack for enable XXState.prototype.onXXX()
-		delete this.onCreation;
-		delete this.onDelete;
+        this.on('creation', function() {
+            this.screen = new MLScreen(this.getGameStateStack().shared.loader);
+            this.addLayer(this.screen);
+            this.load();
+        }.bind(this));
+
+        this.on('delete', function() {
+            this.removeLayer(this.screen);
+            this.screen = null;
+
+            //hack: the map is needed in an other catch of the delete event.
+            //this.map = null;
+        }.bind(this));
 	}
 
 	inherit(MapLoadingState, GameState);
@@ -48,17 +58,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 		return this.map;
 	};
 
-	MapLoadingState.prototype.onCreation = function() {
-		this.screen = new MLScreen(this.getGameStateStack().shared.loader);
-		this.addLayer(this.screen);
-		this.load();
-	};
-
-	MapLoadingState.prototype.onDelete = function() {
-		this.removeLayer(this.screen);
-		this.screen = null;
-		this.map = null;
-	};
 
 
 	/**
