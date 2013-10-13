@@ -11982,7 +11982,56 @@
  <objectgroup name="Player" width="55" height="60">
   <object name="start-spawn" type="spawn" x="224" y="96" width="32" height="32"/>
   <object name="entry_tent" type="spawn" x="1136" y="193" width="34" height="29"/>
-  <object name="robert" type="NPC" x="262" y="189" width="32" height="32"/>
+  <object name="robert" type="NPC" x="262" y="189" width="32" height="32">
+   <properties>
+    <property name="tag" value="tag1"/>
+   </properties>
+  </object>
+  <object name="wp1" type="WAYPOINT" x="705" y="160" width="32" height="32">
+   <properties>
+    <property name="number" value="1"/>
+    <property name="tag_owner" value="tag1"/>
+   </properties>
+  </object>
+  <object name="wp2" type="WAYPOINT" x="117" y="97" width="32" height="32">
+   <properties>
+    <property name="number" value="2"/>
+    <property name="tag_owner" value="tag2"/>
+   </properties>
+  </object>
+  <object name="alfred" type="NPC" x="348" y="80" width="32" height="32">
+   <properties>
+    <property name="tag" value="tag2"/>
+   </properties>
+  </object>
+  <object name="wp2" type="WAYPOINT" x="503" y="163" width="32" height="32">
+   <properties>
+    <property name="number" value="2"/>
+    <property name="tag_owner" value="tag1"/>
+   </properties>
+  </object>
+  <object name="wp2" type="WAYPOINT" x="158" y="162" width="32" height="32">
+   <properties>
+    <property name="number" value="4"/>
+    <property name="tag_owner" value="tag2"/>
+   </properties>
+  </object>
+  <object name="wp2" type="WAYPOINT" x="248" y="91" width="32" height="32">
+   <properties>
+    <property name="number" value="6"/>
+    <property name="tag_owner" value="tag2"/>
+   </properties>
+  </object>
+  <object name="alfred" type="NPC" x="415" y="101" width="32" height="32">
+   <properties>
+    <property name="tag" value="tag2"/>
+   </properties>
+  </object>
+  <object name="alfred" type="NPC" x="462" y="108" width="32" height="32">
+   <properties>
+    <property name="tag" value="tag2"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer name="UpperLayer1" width="55" height="60">
   <data>
