@@ -22,6 +22,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 	 * @constructor
 	 */
 	function MapLoadingScreen(mainLoader) {
+		Layer.call(this);
 		this.mainLoader = mainLoader;
 		this.progress = 0;
 	}
