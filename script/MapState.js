@@ -70,6 +70,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 		this._objects = {};
 		this._refs = {};
+		this._npcs = {};
 
 		// Create the new screen and let it create all drawable objects.
 		if (this.screen) {
@@ -265,8 +266,12 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 							}(obj));
 							break;
 						case 'NPC':
-							obj = new NPC({x: info.x, y: info.y, width: info.width, height: info.height, mode: "FILLED"});
+							obj = new NPC({x: info.x, y: info.y, width: info.width, height: info.height, mode: "FILLED"}, info.tag);
+							this._npcs.push({npc:obj, waypoints:[]});
 							this.screen.getLayerZIndex(i).addChild(obj);
+						break;
+						case 'WAYPOINT':
+							this.associateWaypointToNPC(info);
 						break;
 						default:
 							console.log('MAP: unknow object type: ' + info.type);
@@ -286,7 +291,37 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		}
 	};
 
+	/** This method associate a waypoint to its NPC
+	*/
+	MapState.prototype.associateWaypointToNPC = function(info) {
+		for (var i = 0; i < this._npcs.length; i++) {
+			if (this._npcs[i].npc.tag === info.tag_owner) {
+				this._npcs[i].waypoints.push({tag_owner:info.tag_owner, number: parseInt(info.number)});
+				this.orderWaypoints(this._npcs[i]);
+				this._npcs[i].npc.waypoints = this._npcs[i].waypoints;
+			}
+		}
+	};
 
+	/** This method order the waypoints within a npc
+	*/
+	MapState.prototype.orderWaypoints = function(npc) {
+		var ordered_waypoints = [];
+		var index_little;
+
+		while (npc.waypoints.length > 0) {
+			index_little = 0;
+			for (var i = 0; i < npc.waypoints.length; i++) {
+				if (index_little === i) continue;
+				if (npc.waypoints[i].number < npc.waypoints[index_little].number) {
+					index_little = i;
+				}
+			ordered_waypoints.push(npc.waypoints[index_little]);
+			npc.waypoints.splice(index_little, 1);
+			}
+		}
+		npc.waypoints = ordered_waypoints;
+	};
 
 	/* Old code, should be cleaned */
 

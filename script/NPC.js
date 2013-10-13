@@ -1,7 +1,9 @@
 define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet', 'TW/Collision/CollisionBox'],
 	function (inherit, Rect, AnimatedSprite, SpriteSheet, CollisionBox) {
-		function NPC(obj) {
+		function NPC(obj, tag) {
 			this.position = obj;
+			this.tag = tag;
+			this.waypoints = [];
 			this.collisionBox = new TW.Collision.CollisionBox(this.position);
 			Rect.call(this, obj);
 		}
