@@ -1,11 +1,12 @@
 define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet', 'TW/Collision/CollisionBox'],
 	function (inherit, Rect, AnimatedSprite, SpriteSheet, CollisionBox) {
-		function NPC(obj, loader, tag) {
+		function NPC(obj, loader, tag, mapState) {
 			AnimatedSprite.call(this, {
 				width:          32,
 				height:         32,
-				spriteSheet:    new SpriteSheet(loader.get('image-player'), loader.get('spritesheet-player'))
+				spriteSheet:    new SpriteSheet(loader.get('image-npc'), loader.get('spritesheet-player'))
 			});
+			this.mapState = mapState;
 			this.position = obj;
 			this.tag = tag;
 			this.waypoints = [];
@@ -59,7 +60,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/
 
 				var vector2 = {x : this.waypoints[this.waypointToReach].x - this.position.x, y : this.waypoints[this.waypointToReach].y - this.position.y};
 				var norme2 = Math.sqrt((vector2.x * vector2.x) + (vector2.y * vector2.y));
-				if (norme2 < 50) {
+				if (norme2 < 10) {
 					this.waypointToReach++;
 					if (this.waypointToReach >= this.waypoints.length) {
 						this.waypointToReach = 0;

@@ -45,7 +45,9 @@ require(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/Game
 	    { src: "ressources/images/logo_fill.png", id: "logo_fill", type: 'image'},
 	    { src: "ressources/images/logo_empty.png", id: "logo_empty", type: 'image'},
 	    { src: "ressources/spritesheets/player.json", id: "spritesheet-player", type: 'json'},
+	    { src: "ressources/spritesheets/Enemy.json", id: "spritesheet-enemy", type: 'json'},
 	    { src: "ressources/charsets/TerraSheet.png", id: "image-player", type: 'image'},
+	    { src: "ressources/charsets/NPC.png", id: "image-npc", type: 'image'},
 	    { src: ["ressources/music/main.mp3", "ressources/music/main.ogg"], id: "main-music", type: 'sound'}
 	];
 

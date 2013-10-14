@@ -2,8 +2,8 @@
  * @module GameState
  */
 define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/KeyboardInput', 'TW/Event/InputMapper',
-       'TW/Graphic/TrackingCamera', 'TW/Collision/CollisionBox', 'NPC'],
-       function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, TrackingCamera, CollisionBox, NPC) {
+       'TW/Graphic/TrackingCamera', 'TW/Collision/CollisionBox', 'NPC', 'Enemy'],
+       function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, TrackingCamera, CollisionBox, NPC, Enemy) {
 
 	/**
 	 * @class MapState
@@ -267,7 +267,12 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 							}(obj));
 							break;
 						case 'NPC':
-							obj = new NPC({x: info.x, y: info.y, width: info.width, height: info.height, mode: "FILLED"}, this.getGameStateStack().shared.loader, info.properties.tag);
+							obj = new NPC({x: info.x, y: info.y, width: info.width, height: info.height}, this.getGameStateStack().shared.loader, info.properties.tag, this);
+							this._npcs.push({npc:obj, waypoints:[]});
+							this.screen.getLayerZIndex(i).addChild(obj);
+						break;
+						case 'ENEMY':
+							obj = new Enemy({x: info.x, y: info.y, width: info.width, height: info.height}, this.getGameStateStack().shared.loader, info.properties.tag, this);
 							this._npcs.push({npc:obj, waypoints:[]});
 							this.screen.getLayerZIndex(i).addChild(obj);
 						break;

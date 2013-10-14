@@ -1,6 +1,6 @@
 
 define(['TW/Utils/inherit', 'TW/GameLogic/GameStateStack', 'TW/GameLogic/Gameloop',
-		'TW/Event/KeyboardInput', 'Player', 'TW/Audio/AudioInstance'], function(inherit, GSS, Gameloop, KeyboardInput, Player, AudioInstance) {
+		'TW/Event/KeyboardInput', 'Player', 'Enemy', 'TW/Audio/AudioInstance'], function(inherit, GSS, Gameloop, KeyboardInput, Player, Enemy,  AudioInstance) {
 
 	/**
 	 * Main controller, this class is the global GameStateStack.
