@@ -33,7 +33,9 @@ define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/
 					this.setAttr({x: this.position.x += pixelsValue});
 				break;
 			}
-			this.parent.onChange(this);
+			this.setAttr({ zIndex: this.position.y });
+			this.parent.rmChild(this);
+			this.parent.addChild(this);
 		};
 
 		NPC.prototype.update = function(elapsedTime) {
@@ -46,8 +48,14 @@ define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/
 				vector.y = vector.y / norme;
 				this.position.x += vector.x;
 				this.position.y += vector.y;
+
 				this.setAttr({x: this.position.x, y: this.position.y});
 				this.setAnimationOrientation(vector.x, vector.y);
+
+				this.setAttr({ zIndex: this.position.y });
+				this.parent.rmChild(this);
+				this.parent.addChild(this);
+
 
 				var vector2 = {x : this.waypoints[this.waypointToReach].x - this.position.x, y : this.waypoints[this.waypointToReach].y - this.position.y};
 				var norme2 = Math.sqrt((vector2.x * vector2.x) + (vector2.y * vector2.y));
