@@ -212,12 +212,19 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 			zIndex:     zIndex === undefined ? this.zIndex : zIndex
         });
 
-		//dirty hack,
-		//because the zIndex is not dynamic. (yes, it's a bug)
-		if (zIndex !== undefined && this.parent !== null) {
+       	//this.setAttr({ zIndex: this.y });
+		if (this.parent !== null) {
 			this.parent.rmChild(this);
 			this.parent.addChild(this);
 		}
+
+
+		//dirty hack,
+		//because the zIndex is not dynamic. (yes, it's a bug)
+		//if (zIndex !== undefined && this.parent !== null) {
+		//	this.parent.rmChild(this);
+		//	this.parent.addChild(this);
+		//}
 	};
 
 	return Player;
