@@ -108,6 +108,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/
 
 		NPC.prototype.onStartConversation = function(talkee) {
 			this.isTalking = true;
+			this.pause();
 			var div_dialog = document.createElement('div');
 			this.conversationDiv = div_dialog;
 			div_dialog.style.background = "black";
@@ -160,6 +161,7 @@ define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/
 
 		NPC.prototype.onEndConversation = function(talkee) {
 			this.isTalking = false;
+			this.resume();
 			document.body.removeChild(this.conversationDiv);
 			this.conversationDiv = null;
 			if (this.intervalDialog) {
