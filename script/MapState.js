@@ -67,6 +67,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	MapState.prototype._onCreation = function() {
 		var player = this.getGameStateStack().player;
 		this.player = player;
+		this.player.mapState = this;
 
 		this._objects = {};
 		this._refs = {};
@@ -102,6 +103,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			.bindEvent("MOVE_RIGHT", "KEY_D", keyboard)
 			.bindEvent("MOVE_RIGHT", "KEY_RIGHT", keyboard)
 			.bindEvent("SPRINT", "KEY_SPACE", keyboard)
+			.bindEvent("TALK", "KEY_P", keyboard)
 			.on("MOVE_UP", this.movePlayerDir.bind(this, "up"), KeyboardInput.isPressed)
 			.on("MOVE_DOWN", this.movePlayerDir.bind(this, "down"), KeyboardInput.isPressed)
 			.on("MOVE_LEFT", this.movePlayerDir.bind(this, "left"), KeyboardInput.isPressed)
@@ -111,7 +113,8 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			.on("MOVE_LEFT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
 			.on("MOVE_RIGHT", this.stopMovingDir.bind(this), KeyboardInput.isReleased)
 			.on("SPRINT", this.player.startRunning.bind(this.player), KeyboardInput.isPressed)
-			.on("SPRINT", this.player.stopRunning.bind(this.player), KeyboardInput.isReleased);
+			.on("SPRINT", this.player.stopRunning.bind(this.player), KeyboardInput.isReleased)
+			.on("TALK", this.player.onTalk.bind(this.player), KeyboardInput.isReleased);
 
 
 		//keyboard.once('KEY_G', function() {

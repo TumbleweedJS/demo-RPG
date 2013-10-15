@@ -81,13 +81,13 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 			context.fillRect(context.canvas.width / 18, context.canvas.height / 11, context.canvas.width - 2*(context.canvas.width / 18), context.canvas.height - 2*(context.canvas.height / 11));
 			context.globalAlpha = 1.0;
 			//drawing empty logo
-			context.drawImage(logo_empty, 0, 0, logo_empty.width, logo_empty.height, context.canvas.width / 18, context.canvas.height / 7, logo_empty.width / 1.5, logo_empty.height / 1.5);
+			context.drawImage(logo_empty, 0, 0, logo_empty.width, logo_empty.height, context.canvas.width / 18, context.canvas.height / 3, logo_empty.width / 1.5, logo_empty.height / 1.5);
 			//drawing filled logo (progressing during time)
 		    if (this.progress / 100.0 > 0.0) {
 				context.drawImage(logo_fill,
 				                  0, logo_fill.height * (1 - this.progress / 100.0), logo_fill.width, logo_fill.height * (this.progress / 100.0),
 				                  context.canvas.width / 18,
-				                  context.canvas.height / 7 + logo_fill.height * (1 - this.progress / 100.0) / 1.5,
+				                  context.canvas.height / 3 + logo_fill.height * (1 - this.progress / 100.0) / 1.5,
 				                  logo_fill.width / 1.5, logo_fill.height * (this.progress / 100.0) / 1.5);
 		    }
 			//drawing loading percent.
@@ -95,19 +95,19 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer'], function(inherit, Layer) {
 			context.fillStyle = "rgb(60,144,193)";
 			context.textAlign = "center";
 			context.textBaseline = "middle";
-			context.fillText(this.progress + "%", context.canvas.width / 11 + (logo_empty.width / 3.3), context.canvas.height / 11 + (logo_fill.height * 1.2));
+			context.fillText(this.progress + "%", context.canvas.width / 11 + (logo_empty.width / 3.3), context.canvas.height / 3.5 + (logo_fill.height * 1.2));
 			//Drawing map description
 			context.shadowOffsetX = 0;
 			context.shadowOffsetY = 0;
 			context.shadowBlur = 0;
 			context.textAlign = "left";
-			context.font = "Bold 15px Calibri,Geneva,Arial";
+			context.font = "Bold 25px Calibri,Geneva,Arial";
 			context.fillStyle = "rgb(0,0,0)";
-			context.fillText("Welcome on the tumbleweed RPG Demo", context.canvas.width / 3, context.canvas.height / 3);
-			context.font = "Bold 12px Calibri,Geneva,Arial";
-			context.fillText("We hope that you'll enjoy to see whiches", context.canvas.width / 3, context.canvas.height / 3 + (18 * 2));
-			context.fillText("are the capabilities of the framework.", context.canvas.width / 3, context.canvas.height / 3 + (18 * 3));
-			context.fillText("Press space when loading is complete.", context.canvas.width / 3, context.canvas.height / 3 + (18 * 4));
+			context.fillText("Welcome on the tumbleweed RPG Demo", context.canvas.width / 3.5, context.canvas.height / 3);
+			context.font = "Bold 20px Calibri,Geneva,Arial";
+			context.fillText("We hope that you'll enjoy to see whiches", context.canvas.width / 3, context.canvas.height / 2.5 + (18 * 3));
+			context.fillText("are the capabilities of the framework.", context.canvas.width / 3, context.canvas.height / 2.5 + (18 * 5));
+			context.fillText("Press space when loading is complete.", context.canvas.width / 3, context.canvas.height / 2.5 + (18 * 7));
 	};
 
 	return MapLoadingScreen;

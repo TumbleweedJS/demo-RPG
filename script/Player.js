@@ -9,7 +9,8 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 			spriteSheet:    new SpriteSheet(loader.get('image-player'), loader.get('spritesheet-player'))
 		});
 
-
+		this.mapState = null;
+		this.npcTalking = null;
 		// Default animation
 		this.play('stand_left', true, null);
 		this.currentAnimation = 'stand_down';
@@ -97,7 +98,26 @@ define(['TW/Utils/inherit', 'TW/Graphic/AnimatedSprite', 'TW/Graphic/SpriteSheet
 	   }
 	};
 
+	Player.prototype.onTalk = function() {
+		if (this.npcTalking === null) {
+			for (var i = 0; i < this.mapState._npcs.length; i++) {
+				if (this.getDistanceToNPC(this.mapState._npcs[i].npc) < 50) {
+					this.npcTalking = this.mapState._npcs[i].npc;
+					this.mapState._npcs[i].npc.onStartConversation(this);
+					return;
+				}
+			}
+		} else {
+			this.npcTalking.onEndConversation(this);
+			this.npcTalking = null;
+		}
+	};
 
+	Player.prototype.getDistanceToNPC = function(npc) {
+		var vector = {x: npc.position.x - this.x, y: npc.position.y - this.y};
+		var distance = Math.sqrt((vector.x * vector.x) + (vector.y * vector.y));
+		return distance;
+	};
 
 	Player.prototype.playAnimation = function(name, direction) {
 	   this.state = (name === undefined) ? this.state : name;

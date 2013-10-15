@@ -19,6 +19,14 @@ define(['TW/Utils/inherit', 'TW/Graphic/Rect', 'TW/Graphic/AnimatedSprite', 'TW/
 
 		inherit(Enemy, AnimatedSprite);
 
+		Enemy.prototype.onStartConversation = function(talkee) {
+
+		};
+
+		Enemy.prototype.onEndConversation = function(talkee) {
+
+		};
+
 		Enemy.prototype.move = function(direction, pixelsValue) {
 			switch (direction)
 			{
