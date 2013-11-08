@@ -16,31 +16,21 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 * @constructor
 	 */
 	function StartState() {
-		GameState.call(this, {
-			name:   "start"
-		});
+		GameState.call(this);
 
-        var state = this;
-        this.on('creation', function() { return init(state); });
-	}
+    }
 
 	inherit(StartState, GameState);
 
-    /**
-     * Initialize the screen.
-     *
-     * Listen the SPACE event on keyboard. Called during the `creation` event.
-     * @method init
-     * @param {StartState} state state to initialize. (equivalent of `this`)
-     * @private
-     */
-    function init(state) {
-        var gss = state.getGameStateStack();
-        gss.shared.keyboard.once('KEY_SPACE', function() {
-            gss.pop(400);
-        }, function(_, is_pressed) { return !is_pressed; });
-    }
+    StartState.prototype.init = function() {
+        GameState.prototype.init.call(this);
 
+        var gss = this.getStack();
+        gss.get('keyboard').once('KEY_SPACE', function() {
+            gss.pop(null, 400);
+        }, function(_, is_pressed) { return !is_pressed; });
+
+    };
 
 	/**
 	 * Draw the start screen.
@@ -50,7 +40,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState'], function(inherit, GameSta
 	 */
 	StartState.prototype.draw = function(context) {
 			//Drawing campaign background
-			var loader = this.getGameStateStack().shared.loader;
+			var loader = this.getStack().get('loader');
 			var logo_tumbleweed = loader.get("logo");
 			var background = loader.get("campagne");
 			context.shadowOffsetX = 4;

@@ -10,8 +10,9 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 	 * @class MapLoadingState
 	 * @extends GameState
 	 * @constructor
+     * @param {String} path
 	 */
-	function MapLoadingState() {
+	function MapLoadingState(path) {
 		GameState.call(this, {
 			name:   "map-loading"
 		});
@@ -21,7 +22,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 		 *
 		 * @property {String} path
 		 */
-		this.path = null;
+		this.path = path;
 
 		/**
 		 * Map loaded
@@ -30,14 +31,14 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 		 */
 		this.map = null;
 
-        this.on('creation', function() {
-            this.screen = new MLScreen(this.getGameStateStack().shared.loader);
-            this.addLayer(this.screen);
+        this.on('init', function() {
+            this.screen = new MLScreen(this.getStack().get('loader'));
+            this.addObject(this.screen);
             this.load();
         }.bind(this));
 
         this.on('delete', function() {
-            this.removeLayer(this.screen);
+            this.rmObject(this.screen);
             this.screen = null;
 
             //hack: the map is needed in an other catch of the delete event.
@@ -73,7 +74,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 	MapLoadingState.prototype.load = function() {
 
 		var screen = this.screen;
-		var gss = this.getGameStateStack();
+		var gss = this.getStack();
 
 		var loader = new XHRLoader('ressources/maps/' + this.path, "xml");
 		screen.startMapLoading(loader);
@@ -95,8 +96,8 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapLoadingScreen', 'TW/Pr
 			ress_loader.on('complete', function() {
 				that.map.setResourceLoader(ress_loader);
 
-				gss.shared.keyboard.once('KEY_SPACE', function() {
-					gss.pop(400);
+				gss.get('keyboard').once('KEY_SPACE', function() {
+					gss.pop(that.getMap(), 400);
 				}, function(_, is_pressed) { return !is_pressed; });
 			});
 

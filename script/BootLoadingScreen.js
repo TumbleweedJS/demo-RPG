@@ -60,7 +60,7 @@ define([], function() {
 		context.textBaseline = "middle";
 		context.fillText(loadingValue, x, y);
 		//End of drawing the loading text
-		}
+		};
 
 		this.drawFunction({}, 0.0);
 

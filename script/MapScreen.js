@@ -1,7 +1,7 @@
 
-define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(inherit, Layer, Sprite) {
+define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite', 'TW/Graphic/TrackingCamera', 'TW/Graphic/Rect'], function(inherit, Layer, Sprite, TrackingCamera, Rect) {
 
-	function MapScreen(map, player) {
+	function MapScreen(map) {
 		Layer.call(this, {
 			width:      document.getElementById("mainCanvas").width,
 			height:     document.getElementById("mainCanvas").height
@@ -11,11 +11,33 @@ define(['TW/Utils/inherit', 'TW/Graphic/Layer', 'TW/Graphic/Sprite'], function(i
 		this.saveLayers = [];
 
 		this._createSpriteMap();
-
-		this.addChild(player);
 	}
 
 	inherit(MapScreen, Layer);
+
+
+    MapScreen.prototype.draw = function(context) {
+        context.fillStyle = 'black';
+        context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+        Layer.prototype.draw.call(this, context);
+    };
+
+    /**
+     * Add the player to the map and set the camera
+     *
+     * @method addPlayer
+     * @param {Player} player
+     */
+    MapScreen.prototype.addPlayer = function(player) {
+        this.addChild(player);
+
+        // Tracking Camera: make the camera follow the player.
+        this.camera = new TrackingCamera(player);
+        this.camera.margin = {
+            x:  100,
+            y: 100
+        };
+    };
 
 	/**
 	*	Retrieve the Layer which have the specified zIndex.

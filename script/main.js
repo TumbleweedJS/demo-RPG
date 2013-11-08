@@ -72,23 +72,8 @@ require(['TW/Graphic/Window', 'TW/Preload/Loader', 'BootLoadingScreen', 'TW/Game
 		var gss = new Game(win.canvas);
 
 		// shared zone used to share resources.
-		gss.shared = {
-			keyboard:   new KeyboardInput(),
-			loader:     loader
-		};
-
-
-		/* add all GS */
-		gss.map_load = new MapLoadingState();
-		gss.map_state = new MapState();
-		gss.start_state = new StartState();
-
-		gss.start_state.on('delete', function() {
-			gss.createPlayer();
-			gss.goToMap('default.tmx', 'start-spawn');
-		});
-
-		gss.push(gss.start_state, 300);    // !!!
+        gss.set('keyboard', new KeyboardInput());
+        gss.set('loader', loader);
 
 		gss.start();
 	}

@@ -2,18 +2,18 @@
  * @module GameState
  */
 define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/KeyboardInput', 'TW/Event/InputMapper',
-       'TW/Graphic/TrackingCamera', 'TW/Collision/CollisionBox', 'NPC', 'Enemy'],
-       function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, TrackingCamera, CollisionBox, NPC, Enemy) {
+       'TW/Collision/CollisionBox', 'NPC', 'Enemy'],
+       function(inherit, GameState, MapScreen, KeyboardInput, InputMapper, CollisionBox, NPC, Enemy) {
 
 	/**
 	 * @class MapState
 	 * @extends GameState
 	 * @constructor
+     * @param {Map} map map loaded from a LoadingState.
+     * @param {Loader} ressource loader.
 	 */
-	function MapState() {
-		GameState.call(this, {
-			name:   "map"
-		});
+	function MapState(map, loader) {
+		GameState.call(this);
 
 		/**
 		 * TMX map parsed.
@@ -21,16 +21,16 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 		 *
 		 * @property {Map} map
 		 */
-		this.map = null;
+		this.map = map;
 
 		/**
 		 * List of all objects which are not purely graphic.
 		 *
 		 * Each type of objects have it own entry in the attribute.
 		 *
-		 * @property {Object} _objects
+		 * @property {Object} _logic_objects
 		 */
-		this._objects = {};
+		this._logic_objects = {};
 
 		/**
 		 * Contain reference to all objects with a name.
@@ -45,14 +45,17 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 		this.mapper = null;
 
-		//hack for enable XXState.prototype.onXXX()
-		delete this.onCreation;
-		//delete this.onDelete;
+        this._npcs = [];
+        this._waypoints = [];
+
+        // Create the new screen and let it create all drawable objects.
+        this.screen = new MapScreen(this.map);
+        this.addObject(this.screen);
 
 
-        this.on('creation', this._onCreation.bind(this));
-
-	}
+        // process the this.map attribute for create all objects in memory.
+        this._initObjects(loader);
+    }
 
 	inherit(MapState, GameState);
 
@@ -62,36 +65,21 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	 *
 	 * `this.map` is already defined and the player can be get from the `Game` class.
 	 *
-	 * @method _onCreation
+	 * @method init
 	 */
-	MapState.prototype._onCreation = function() {
-		var player = this.getGameStateStack().player;
-		this.player = player;
-		this.player.mapState = this;
+	MapState.prototype.init = function() {
+        GameState.prototype.init.call(this);
 
-		this._objects = {};
-		this._refs = {};
-		this._npcs = [];
-		this._waypoints = [];
+        //set the player
+        this.player = this.getStack().player;
+        this.player.mapState = this;
 
-		// Create the new screen and let it create all drawable objects.
-		if (this.screen) {
-			this.removeLayer(this.screen);
-		}
-		this.screen = new MapScreen(this.map, player);
-		this.addLayer(this.screen);
+        this.screen.addPlayer(this.player);
 
 
-		// process the this.map attribute for create all objects in memory.
-		this._initObjects();
+        // Controle Keyboard
+		var keyboard = this.getStack().get('keyboard');
 
-
-		// Controle Keyboard
-		var keyboard = this.getGameStateStack().keyboard;
-
-		if (this.mapper !== null) {
-			this.mapper.removeAll();
-		}
 		this.mapper = new InputMapper();
 		this.mapper.allowMultiInput = true;
 		this.mapper.bindEvent("MOVE_UP", "KEY_W", keyboard)
@@ -118,21 +106,28 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 
 		//keyboard.once('KEY_G', function() {
-		//	this.getGameStateStack().goToMap('map2.tmx', 'spawn-2');
+		//	this.getStack().goToMap('map2.tmx', 'spawn-2');
 		//}.bind(this));
 		//this.keyboard.on("KEY_M", this.muteUnmuteMusic.bind(this), KeyboardInput.isPressed);
 		//this.keyboard.on("KEY_P", this.pauseResume.bind(this), KeyboardInput.isPressed);
-
-
-
-		// Tracking Camera: make the camera follow the player.
-		// TODO: this should be done in the view (MapScreen)
-		this.screen.camera = new TrackingCamera(player);
-		this.screen.camera.margin = {
-			x:  100,
-			y: 100
-		};
 	};
+
+
+    /**
+     * @method dispose
+     */
+    MapState.prototype.dispose = function() {
+        if (this.mapper !== null) {
+            this.mapper.removeAll();
+        }
+        if (this.screen) {
+            this.rmObject(this.screen);
+        }
+        this._logic_objects = null;
+        this._refs = null;
+        this._npcs = null;
+        this._waypoints = null;
+    };
 
 
 	/**
@@ -188,9 +183,9 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	 * @private
      */
 	MapState.prototype._checkTriggerZone = function() {
-		var length = this._objects.zone === undefined ? 0 : this._objects.zone.length;
+		var length = this._logic_objects.zone === undefined ? 0 : this._logic_objects.zone.length;
 		for (var i = 0; i < length; i++) {
-			var zone = this._objects.zone[i];
+			var zone = this._logic_objects.zone[i];
 			if (zone.box.isCollidingBox(this.player.collisionBox) !== zone.isInZone) {
 				if (zone.isInZone) {
 					if (zone.trigger.onLeave) {
@@ -204,16 +199,6 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 				zone.isInZone = !zone.isInZone;
 			}
 		}
-	};
-
-	/**
-	 * set and initialize a new map.
-	 *
-	 * @method setMap
-	 * @param {Map} map
-	*/
-	MapState.prototype.setMap = function(map) {
-		this.map = map;
 	};
 
 	/**
@@ -232,9 +217,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 	 * initialize all objects present in layers.
 	 *
 	 * @method _initObjects
+     * @param {Loader} loader
 	 * @private
 	 */
-	MapState.prototype._initObjects = function() {
+	MapState.prototype._initObjects = function(loader) {
 		for (var i = 0; i < this.map.layers.length; i++) {
 			var layer = this.map.layers[i];
 
@@ -270,12 +256,12 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 							}(obj));
 							break;
 						case 'NPC':
-							obj = new NPC({x: info.x, y: info.y, width: info.width, height: info.height}, this.getGameStateStack().shared.loader, info.properties.tag, this);
+							obj = new NPC({x: info.x, y: info.y, width: info.width, height: info.height}, loader, info.properties.tag, this);
 							this._npcs.push({npc:obj, waypoints:[]});
 							this.screen.getLayerZIndex(i).addChild(obj);
 						break;
 						case 'ENEMY':
-							obj = new Enemy({x: info.x, y: info.y, width: info.width, height: info.height}, this.getGameStateStack().shared.loader, info.properties.tag, this);
+							obj = new Enemy({x: info.x, y: info.y, width: info.width, height: info.height}, loader, info.properties.tag, this);
 							this._npcs.push({npc:obj, waypoints:[]});
 							this.screen.getLayerZIndex(i).addChild(obj);
 						break;
@@ -286,10 +272,10 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 							console.log('MAP: unknow object type: ' + info.type);
 					}
 					if (obj !== null) {
-						if (this._objects[info.type] === undefined) {
-							this._objects[info.type] = [];
+						if (this._logic_objects[info.type] === undefined) {
+							this._logic_objects[info.type] = [];
 						}
-						this._objects[info.type].push(obj);
+						this._logic_objects[info.type].push(obj);
 
 						if (info.name !== null) {
 							this._refs[info.name] = obj;
@@ -299,7 +285,7 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 			}
 		}
 		//Tous les objets ont etes creer.
-		for (var i = 0; i < this._waypoints.length; i++) {
+		for (i = 0; i < this._waypoints.length; i++) {
 			this.associateWaypointToNPC(this._waypoints[i]);
 		}
 	};
@@ -347,9 +333,9 @@ define(['TW/Utils/inherit', 'TW/GameLogic/GameState', 'MapScreen', 'TW/Event/Key
 
 
        MapState.prototype.isPlayerCollidingAnObstacle = function() {
-	       var length = this._objects['collision'].length;
+	       var length = this._logic_objects['collision'].length;
 	       for (var i = 0; i < length; i++) {
-		       if (this._objects['collision'][i].isCollidingBox(this.player.collisionBox)) {
+		       if (this._logic_objects['collision'][i].isCollidingBox(this.player.collisionBox)) {
 			       return true;
 		       }
 	       }
